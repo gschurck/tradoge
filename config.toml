@@ -1,0 +1,10 @@
+[tradoge]
+tweet_frequency = "10"
+trading_pair = "USDT"
+quantity = "100"
+sell_delay = "5"
+
+[binance]
+api_key = ""
+secret_key = ""
+salt = ""
