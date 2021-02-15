@@ -1,21 +1,30 @@
+print('Installation of dependencies...')
 import sys, subprocess
-subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
 
-import base64
-import os
-from cryptography.fernet import Fernet
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-import time
-import twint
-import timg
-import toml
-from art import tprint
-from binance.client import Client
-from PyInquirer import prompt
-from progress.bar import Bar
-from datetime import datetime
-import threading
+try:
+    import base64
+    import os
+    from cryptography.fernet import Fernet
+    from cryptography.hazmat.primitives import hashes
+    from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+    import time
+    import timg
+    import toml
+    from art import tprint
+    from binance.client import Client
+    from PyInquirer import prompt
+    from progress.bar import Bar
+    from datetime import datetime
+    import threading
+
+except ImportError:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
+    subprocess.check_call([sys.executable, "-m", "pip3", "install", "--user", "--upgrade","git+https://github.com/twintproject/twint.git@origin/master#egg=twint"])
+
+
+try:
+    import twint
+except:
 
 # Colors class for tuning CLI
 class colors:
