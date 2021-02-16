@@ -324,8 +324,10 @@ def main():
     twint.run.Search(c)
     lastTweet = tweets[0]
     lastTweet_datetime = datetime.strptime(tweets[0].datetime[:19], '%Y-%m-%d  %H:%M:%S')
+    '''
     w = threading.Thread(target=waiting)
     w.start()
+    '''
     while (True):
         tweets.clear()
         twint.run.Search(c)
