@@ -32,12 +32,15 @@ tradoge.py
 ![alt text](https://github.com/gschurck/tradoge/blob/media/elon1.png?raw=true)
 ![alt text](https://github.com/gschurck/tradoge/blob/media/graph1.png?raw=true)
 **+10%**
+
 ------
 
 ![alt text](https://github.com/gschurck/tradoge/blob/media/elon2.png?raw=true)
 ![alt text](https://github.com/gschurck/tradoge/blob/media/graph2.png?raw=true)
+**+17.5%**
 
 ------
 
 ![alt text](https://github.com/gschurck/tradoge/blob/media/elon3.png?raw=true)
 ![alt text](https://github.com/gschurck/tradoge/blob/media/graph3.png?raw=true)
+**+8%**
