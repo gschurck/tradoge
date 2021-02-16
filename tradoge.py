@@ -333,7 +333,7 @@ def main():
         twint.run.Search(c)
         tweet_datetime = datetime.strptime(tweets[0].datetime[:19], '%Y-%m-%d  %H:%M:%S')
         if lastTweet.id == tweets[0].id:
-            print("Waiting for new DOGE tweet from Elon  (CTRL+C to stop)", end="\r")
+            print(datetime.now().strftime("%H:%M:%S")+" : Waiting for new DOGE tweet from Elon  (CTRL+C to stop)", end="\r")
 
         elif tweet_datetime>lastTweet_datetime and '@' not in tweets[0].tweet:
             print("NEW TWEET")
