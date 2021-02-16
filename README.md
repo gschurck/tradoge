@@ -31,7 +31,7 @@ tradoge.py
 
 ![alt text](https://github.com/gschurck/tradoge/blob/media/elon1.png?raw=true)
 ![alt text](https://github.com/gschurck/tradoge/blob/media/graph1.png?raw=true)
-
+**+10%**
 ------
 
 ![alt text](https://github.com/gschurck/tradoge/blob/media/elon2.png?raw=true)
