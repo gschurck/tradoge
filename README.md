@@ -10,6 +10,8 @@ Tradoge is a Binance trading bot that instantly buys and sells DOGE cryptocurren
 
 ## Installing
 
+**Require Python 3.7**
+
 **Git:**
 ```bash
 git clone https://github.com/gschurck/tradoge.git
