@@ -16,7 +16,7 @@ try:
     from progress.bar import Bar
     from datetime import datetime
     import threading
-    from colorama import init, Fore, Back, Style
+    from colorama import init, Fore
 except:
     subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
 
@@ -29,37 +29,17 @@ except ImportError:
 
 init(convert=True)
 
-# Colors class for tuning CLI
-class colors:
-    reset='\033[0m'
-    class fg: 
-        black='\033[30m'
-        red='\033[31m'
-        green='\033[32m'
-        orange='\033[33m'
-        blue='\033[34m'
-        purple='\033[35m'
-        cyan='\033[36m'
-        lightgrey='\033[37m'
-        darkgrey='\033[90m'
-        lightred='\033[91m'
-        lightgreen='\033[92m'
-        yellow='\033[93m'
-        lightblue='\033[94m'
-        pink='\033[95m'
-        lightcyan = '\033[96m'
-
 # Config class for retrieving Binance credentials from .toml file
 class Config:
     def __init__(self):
-        self.config = toml.load('config.toml')
+        self.config = toml.load('data/config.toml')
         if self.config["binance"]:
             binance = self.config["binance"]
             self.api_key = binance["api_key"]
             self.secret_key = binance["secret_key"]
     
     def get_toml(self):
-        self.config = toml.load('config.toml')
+        self.config = toml.load('data/config.toml')
         binance = self.config["binance"]
         self.api_key = binance["api_key"]
         self.secret_key = binance["secret_key"]
@@ -80,7 +60,7 @@ def on_start():
     # Decorations
     print(Fore.YELLOW)
     obj = timg.Renderer()                                                                                               
-    obj.load_image_from_file("dogecoin.png")                                                                                
+    obj.load_image_from_file("data/dogecoin.png")                                                                                
     obj.resize(100,100)
     obj.render(timg.ASCIIMethod)
     tprint("TraDOGE","font: varsity")
@@ -124,7 +104,7 @@ def setup(config, client):
     answers = prompt(setup_questions)
     if not (bool(answers['tweet_frequency']) & bool(answers['trading_pair']) & bool(answers['quantity']) & bool(answers['sell_delay'])):
         sys.exit("Security Stop : Empty input")
-    file_name='config.toml'
+    file_name='data/config.toml'
     data = toml.load(file_name)
     data['tradoge']=answers
     with open(file_name, "w") as toml_file:
@@ -136,18 +116,21 @@ def menu(nconfig, client):
     config = nconfig.get_toml()
     doge_balance = client.get_asset_balance(asset='DOGE')['free']
     pair_balance = client.get_asset_balance(asset=config['tradoge']['trading_pair'])['free']
-    print("\033[1m"+'❯ Current account balance : '+"\033[0m")
+    print("\033[1m"+'> Current account balance : '+"\033[0m")
     print(Fore.YELLOW + str(doge_balance) + ' DOGE' + Fore.RESET)
     print(Fore.YELLOW + str(pair_balance) + ' '+ config['tradoge']['trading_pair'] + Fore.RESET)
     print_avg_price(client)
     price = client.get_avg_price(symbol='DOGEUSDT')['price']
     doge_value = float(doge_balance) * float(price)
+    doge_buy_value = round(int(config['tradoge']['quantity']) * float(price),2)
+    
     print('DOGE account average value : \n' + Fore.YELLOW + str(round(doge_value, 2)) + ' $' + Fore.RESET)
     print('')
-    print("\033[1m"+'❯ Current configuration : '+"\033[0m")
+    print("\033[1m"+'> Current configuration : '+"\033[0m")
     print('Tweets update frequency : \n' + Fore.YELLOW + config['tradoge']['tweet_frequency'] + ' seconds'+Fore.RESET)
     print('Trading pair : \n' + Fore.YELLOW + 'DOGE/'+config['tradoge']['trading_pair'] +Fore.RESET)
-    print('Quantity of DOGE coins to buy & sell : \n' + Fore.YELLOW + config['tradoge']['quantity'] + ' DOGE'+Fore.RESET)
+    print('Quantity of DOGE coins to buy & sell : \n' + Fore.YELLOW + config['tradoge']['quantity'] + ' DOGE' + Fore.RESET)
+    print(Fore.YELLOW + config['tradoge']['quantity']+' DOGE ≃ ' + str(doge_buy_value) + ' $'+Fore.RESET)
     print('Delay before selling : \n' + Fore.YELLOW + config['tradoge']['sell_delay'] + ' mins'+Fore.RESET)
     print('')
 
@@ -185,7 +168,7 @@ def signup():
         passwords = prompt(ask_passwords)
         if passwords['password1'] == passwords['password2']:
             break
-        print(colors.fg.red+'Passwords are not the same, try again'+Fore.RESET)
+        print(Fore.RED+'Passwords are not the same, try again'+Fore.RESET)
 
     ask_api_keys = [
             {
@@ -224,18 +207,18 @@ def login(config):
         try:
             api_key, secret_key = decrypt_keys(config, password['password'])
         except:
-            print(colors.fg.red + 'PASSWORD IS WRONG. Try again \n' + Fore.RESET)
+            print(Fore.RED + 'PASSWORD IS WRONG. Try again \n' + Fore.RESET)
             time.sleep(1)
             print('Type RESET to change your API keys')
             time.sleep(1)
             continue
         client=Client(api_key, secret_key)
         if client.get_system_status()['status'] == 0:
-            print(colors.fg.green + 'CONNECTED TO YOUR BINANCE ACCOUNT' + Fore.RESET)
+            print(Fore.GREEN + 'CONNECTED TO YOUR BINANCE ACCOUNT' + Fore.RESET)
             time.sleep(1)
             break
         else:
-            print(colors.fg.red + 'Connection to your Binance account failed. \n' + Fore.RESET)
+            print(Fore.RED + 'Connection to your Binance account failed. \n' + Fore.RESET)
             ask_retry = [
                 {
                     'type': 'list',
@@ -265,7 +248,7 @@ def encrypt_keys(api_key, secret_key, password):
     api_token = f.encrypt(api_key.encode())
     secret_token = f.encrypt(secret_key.encode())
 
-    file_name='config.toml'
+    file_name='data/config.toml'
     data = toml.load(file_name)
     data['binance']['api_key']=api_token
     data['binance']['secret_key']=secret_token
