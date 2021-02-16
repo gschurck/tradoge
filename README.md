@@ -1,6 +1,6 @@
 # :chart_with_upwards_trend: TraDOGE
 
-Tradoge is a Binance trading bot that instantly buys and sells DOGE cryptocurrency when Elon Musk tweets about it.
+Tradoge is a Binance trading bot that instantly buys and sells DOGE cryptocurrency on Binance when Elon Musk tweets about it.
 
 ![alt text](https://github.com/gschurck/tradoge/blob/media/tradoge.png?raw=true)
 
