@@ -16,7 +16,7 @@ try:
     from progress.bar import Bar
     from datetime import datetime
     import threading
-except ImportError:
+except:
     subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
 
 
@@ -159,8 +159,9 @@ def menu(nconfig, client):
     menu_answers=prompt(menu_questions)
     if menu_answers['start'] == 'Change config':
         setup(nconfig, client)
-    elif ['start'] == 'Exit':
+    elif menu_answers['start'] == 'Exit':
         sys.exit("User exited from TraDOGE")
+
 
 def signup():
     print('Welcome in TraDOGE !')
