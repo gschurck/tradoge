@@ -1,4 +1,4 @@
-print('Installation of dependencies...')
+print('Check dependencies...')
 import sys, subprocess
 
 try:
@@ -333,14 +333,19 @@ def main():
         twint.run.Search(c)
         tweet_datetime = datetime.strptime(tweets[0].datetime[:19], '%Y-%m-%d  %H:%M:%S')
         if lastTweet.id == tweets[0].id:
-
-            print('no new tweet')
             print("Waiting for new DOGE tweet from Elon  (CTRL+C to stop)", end="\r")
 
         elif tweet_datetime>lastTweet_datetime and '@' not in tweets[0].tweet:
             print("NEW TWEET")
             print(tweets[0].tweet)
+            
             # Buy order
+            #'''
+            buy = client.order_market_buy(
+                symbol='DOGE'+ config['tradoge']['trading_pair'],
+                quantity=int(config['tradoge']['quantity']),
+            )
+            # Use limit order instead with a different price to test
             '''
             buy = client.order_limit_buy(
                 symbol='DOGE'+ config['tradoge']['trading_pair'],
@@ -348,36 +353,33 @@ def main():
                 price='0.04'
             )
             '''
-            buy = client.order_market_buy(
-                symbol='DOGE'+ config['tradoge']['trading_pair'],
-                quantity=int(config['tradoge']['quantity']),
-            )
-            
             print(buy)
             print("ACHAT EFFECTUE")
             
             # Waiting time before selling, with progress bar
-            delay_seconds=int(config['tradoge']['tweet_frequency'])*60
+
+            delay_seconds=int(config['tradoge']['sell_delay'])*60
             bar = SlowBar('Waiting to sell ' + config['tradoge']['quantity'] + ' DOGE in '+ config['tradoge']['trading_pair'], max=delay_seconds)
             for i in reversed(range(delay_seconds)):
                 time.sleep(1)
                 bar.next()
             bar.finish()
+            #time.sleep(int(answers['sell_delay'])*60)
 
             # Sell order
-            #time.sleep(int(answers['sell_delay'])*60)
+            #'''
+            sell = client.order_market_sell(
+                symbol='DOGE'+ config['tradoge']['trading_pair'],
+                quantity=int(config['tradoge']['quantity']),
+            )
+            # Use limit order instead with a different price to test
             '''
-            sell = client.order_limit_buy(
+            sell = client.order_limit_sell(
                 symbol='DOGE'+ config['tradoge']['trading_pair'],
                 quantity=int(config['tradoge']['quantity']),
                 price='0.1'
             )
             '''
-            sell = client.order_market_sell(
-                symbol='DOGE'+ config['tradoge']['trading_pair'],
-                quantity=int(config['tradoge']['quantity']),
-            )
-
             print(sell)
             print('Sold')
             print('\n')
