@@ -27,6 +27,11 @@ tradoge.py
 ```
 :warning: If you experience issues during installation try to restart the script a few times
 
+**If you have errors with twint import try:**
+```bash
+pip3 install --upgrade -e git+https://github.com/twintproject/twint.git@origin/master#egg=twint
+```
+
 ## Why use Tradoge ?
 
 ![alt text](https://github.com/gschurck/tradoge/blob/media/elon1.png?raw=true)
