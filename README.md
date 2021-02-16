@@ -6,11 +6,18 @@ Tradoge is a Binance trading bot that instantly buys and sells DOGE cryptocurren
 
 ## Main features :
 
-- User-friendly command-line interface
-- Binance API keys are encrypted with a password using SHA-256
-- Full configuration can be changed easily in menu, without coding
+- :closed_lock_with_key: User-friendly command-line interface
+- :thumbsup: Binance API keys are encrypted with a password using SHA-256
+- :gear: Full configuration can be changed easily in menu, without coding
 
 ## Installing
+
+### Windows
+[Download tradoge.zip](https://github.com/gschurck/tradoge/releases)
+
+------
+
+### Python script
 
 **Require Python 3.7**
 
@@ -27,7 +34,7 @@ tradoge.py
 ```
 :warning: If you experience issues during installation try to restart the script a few times
 
-**If you have errors with twint import try:**
+**If you have errors with twint import, try:**
 ```bash
 pip3 install --upgrade -e git+https://github.com/twintproject/twint.git@origin/master#egg=twint
 ```
