@@ -21,22 +21,26 @@ Tradoge is a Binance trading bot that instantly buys and sells DOGE cryptocurren
 
 **Require Python 3.7**
 
-**Git:**
+**Git :**
 ```bash
 git clone https://github.com/gschurck/tradoge.git
 cd tradoge
 python -m pip install -r requirements.txt
 ```
-**Then run:**
+**Then run :**
 ```bash
 cd ..
 tradoge.py
 ```
 :warning: If you experience issues during installation try to restart the script a few times
 
-**If you have errors with twint import, try:**
+**If you have errors with twint import, try :**
 ```bash
 pip3 install --upgrade -e git+https://github.com/twintproject/twint.git@origin/master#egg=twint
+```
+**On Raspberry Py, numpy import can cause an error. Try :**
+```bash
+sudo apt-get install libatlas-base-dev
 ```
 
 ## Why use Tradoge ?
