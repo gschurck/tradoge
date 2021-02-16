@@ -19,12 +19,12 @@ try:
 
 except ImportError:
     subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
-    subprocess.check_call([sys.executable, "-m", "pip3", "install", "--user", "--upgrade","git+https://github.com/twintproject/twint.git@origin/master#egg=twint"])
 
 
 try:
     import twint
-except:
+except ImportError:
+    subprocess.check_call([sys.executable, "-m", "pip3", "install", "--user", "--upgrade","git+https://github.com/twintproject/twint.git@origin/master#egg=twint"])
 
 # Colors class for tuning CLI
 class colors:
@@ -324,8 +324,10 @@ def main():
     twint.run.Search(c)
     lastTweet = tweets[0]
     lastTweet_datetime = datetime.strptime(tweets[0].datetime[:19], '%Y-%m-%d  %H:%M:%S')
+    '''
     w = threading.Thread(target=waiting)
     w.start()
+    '''
     while (True):
         tweets.clear()
         twint.run.Search(c)
