@@ -23,6 +23,7 @@ python -m pip install -r requirements.txt
 cd ..
 tradoge.py
 ```
+:warning: If you experience issues during installation try to restart the script a few times
 
 ## Why use Tradoge ?
 
