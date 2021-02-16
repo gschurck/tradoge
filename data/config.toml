@@ -1,7 +1,7 @@
 [tradoge]
 tweet_frequency = "10"
 trading_pair = "USDT"
-quantity = "100"
+quantity = "1000"
 sell_delay = "5"
 
 [binance]
