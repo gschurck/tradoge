@@ -1,4 +1,4 @@
-# TraDOGE
+# :chart_with_upwards_trend: TraDOGE
 
 Tradoge is a Binance trading bot that instantly buys and sells DOGE cryptocurrency when Elon Musk tweets about it.
 
@@ -6,8 +6,8 @@ Tradoge is a Binance trading bot that instantly buys and sells DOGE cryptocurren
 
 ## Main features :
 
-- :closed_lock_with_key: User-friendly command-line interface
-- :thumbsup: Binance API keys are encrypted with a password using SHA-256
+- :thumbsup: User-friendly command-line interface
+- :closed_lock_with_key: Binance API keys are encrypted with a password using SHA-256
 - :gear: Full configuration can be changed easily in menu, without coding
 
 ## Installing
