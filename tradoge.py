@@ -16,7 +16,6 @@ try:
     from progress.bar import Bar
     from datetime import datetime
     import threading
-
 except ImportError:
     subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
 
