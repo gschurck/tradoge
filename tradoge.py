@@ -308,6 +308,7 @@ def main():
     c.Store_object = True
     c.Store_object_tweets_list = tweets
     c.Hide_output = True
+    c.Filter_retweets = True
     twint.run.Search(c)
     lastTweet = tweets[0]
     lastTweet_datetime = datetime.strptime(tweets[0].datetime[:19], '%Y-%m-%d  %H:%M:%S')
