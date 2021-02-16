@@ -16,6 +16,7 @@ try:
     from progress.bar import Bar
     from datetime import datetime
     import threading
+    from colorama import init, Fore, Back, Style
 except:
     subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
 
@@ -25,7 +26,9 @@ try:
 except ImportError:
     subprocess.check_call([sys.executable, "-m", "pip", "install", "--user", "--upgrade","git+https://github.com/twintproject/twint.git@origin/master#egg=twint"])
     import twint
-    
+
+init(convert=True)
+
 # Colors class for tuning CLI
 class colors:
     reset='\033[0m'
@@ -63,8 +66,8 @@ class Config:
         return self.config
 
 class SlowBar(Bar):
-    suffix = colors.fg.yellow + '%(remaining_minutes)d minutes '+ colors.reset +' (%(remaining_seconds)d seconds)'
-    fill=colors.fg.yellow + '$' + colors.reset
+    suffix = Fore.YELLOW + '%(remaining_minutes)d minutes '+ Fore.RESET +' (%(remaining_seconds)d seconds)'
+    fill=Fore.YELLOW + '$' + Fore.RESET
     @property
     def remaining_minutes(self):
         return self.eta // 60
@@ -75,18 +78,18 @@ class SlowBar(Bar):
 def on_start():
     # TODO import : pip3 install --user --upgrade git+https://github.com/twintproject/twint.git@origin/master#egg=twint
     # Decorations
-    print(colors.fg.yellow)
+    print(Fore.YELLOW)
     obj = timg.Renderer()                                                                                               
     obj.load_image_from_file("dogecoin.png")                                                                                
     obj.resize(100,100)
     obj.render(timg.ASCIIMethod)
     tprint("TraDOGE","font: varsity")
-    print(colors.reset)
+    print(Fore.RESET)
 
 
 def print_avg_price(client):
     get = client.get_avg_price(symbol='DOGEUSDT')
-    print('Average price of DOGE in USD for the last '+ str(get['mins']) + ' minutes : \n' + colors.fg.yellow + str(get['price']) + " $" + colors.reset)
+    print('Average price of DOGE in USD for the last '+ str(get['mins']) + ' minutes : \n' + Fore.YELLOW + str(get['price']) + " $" + Fore.RESET)
 
 def setup(config, client):
     setup_questions = [
@@ -134,18 +137,18 @@ def menu(nconfig, client):
     doge_balance = client.get_asset_balance(asset='DOGE')['free']
     pair_balance = client.get_asset_balance(asset=config['tradoge']['trading_pair'])['free']
     print("\033[1m"+'❯ Current account balance : '+"\033[0m")
-    print(colors.fg.yellow + str(doge_balance) + ' DOGE' + colors.reset)
-    print(colors.fg.yellow + str(pair_balance) + ' '+ config['tradoge']['trading_pair'] + colors.reset)
+    print(Fore.YELLOW + str(doge_balance) + ' DOGE' + Fore.RESET)
+    print(Fore.YELLOW + str(pair_balance) + ' '+ config['tradoge']['trading_pair'] + Fore.RESET)
     print_avg_price(client)
     price = client.get_avg_price(symbol='DOGEUSDT')['price']
     doge_value = float(doge_balance) * float(price)
-    print('DOGE account average value : \n' + colors.fg.yellow + str(round(doge_value, 2)) + ' $' + colors.reset)
+    print('DOGE account average value : \n' + Fore.YELLOW + str(round(doge_value, 2)) + ' $' + Fore.RESET)
     print('')
     print("\033[1m"+'❯ Current configuration : '+"\033[0m")
-    print('Tweets update frequency : \n' + colors.fg.yellow + config['tradoge']['tweet_frequency'] + ' seconds'+colors.reset)
-    print('Trading pair : \n' + colors.fg.yellow + 'DOGE/'+config['tradoge']['trading_pair'] +colors.reset)
-    print('Quantity of DOGE coins to buy & sell : \n' + colors.fg.yellow + config['tradoge']['quantity'] + ' DOGE'+colors.reset)
-    print('Delay before selling : \n' + colors.fg.yellow + config['tradoge']['sell_delay'] + ' mins'+colors.reset)
+    print('Tweets update frequency : \n' + Fore.YELLOW + config['tradoge']['tweet_frequency'] + ' seconds'+Fore.RESET)
+    print('Trading pair : \n' + Fore.YELLOW + 'DOGE/'+config['tradoge']['trading_pair'] +Fore.RESET)
+    print('Quantity of DOGE coins to buy & sell : \n' + Fore.YELLOW + config['tradoge']['quantity'] + ' DOGE'+Fore.RESET)
+    print('Delay before selling : \n' + Fore.YELLOW + config['tradoge']['sell_delay'] + ' mins'+Fore.RESET)
     print('')
 
     menu_questions = [
@@ -182,7 +185,7 @@ def signup():
         passwords = prompt(ask_passwords)
         if passwords['password1'] == passwords['password2']:
             break
-        print(colors.fg.red+'Passwords are not the same, try again'+colors.reset)
+        print(colors.fg.red+'Passwords are not the same, try again'+Fore.RESET)
 
     ask_api_keys = [
             {
@@ -221,18 +224,18 @@ def login(config):
         try:
             api_key, secret_key = decrypt_keys(config, password['password'])
         except:
-            print(colors.fg.red + 'PASSWORD IS WRONG. Try again \n' + colors.reset)
+            print(colors.fg.red + 'PASSWORD IS WRONG. Try again \n' + Fore.RESET)
             time.sleep(1)
             print('Type RESET to change your API keys')
             time.sleep(1)
             continue
         client=Client(api_key, secret_key)
         if client.get_system_status()['status'] == 0:
-            print(colors.fg.green + 'CONNECTED TO YOUR BINANCE ACCOUNT' + colors.reset)
+            print(colors.fg.green + 'CONNECTED TO YOUR BINANCE ACCOUNT' + Fore.RESET)
             time.sleep(1)
             break
         else:
-            print(colors.fg.red + 'Connection to your Binance account failed. \n' + colors.reset)
+            print(colors.fg.red + 'Connection to your Binance account failed. \n' + Fore.RESET)
             ask_retry = [
                 {
                     'type': 'list',
