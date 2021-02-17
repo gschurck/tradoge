@@ -12,12 +12,12 @@ Tradoge is a Binance trading bot that instantly buys and sells DOGE cryptocurren
 
 ## Installing
 
+:information_source: I recommend to run tradoge in the [new Windows terminal](https://www.microsoft.com/fr-fr/p/windows-terminal/9n0dx20hk701) for full support of Unicode characters and better visual experience.
+
 ### Windows
-[Download tradoge.zip](https://github.com/gschurck/tradoge/releases)
+:inbox_tray: [Download tradoge.zip](https://github.com/gschurck/tradoge/releases)
 
-I recommend to use the [new Windows terminal](https://www.microsoft.com/fr-fr/p/windows-terminal/9n0dx20hk701) for full support of Unicode characters and better visual experience.
-
-------
+OR
 
 ### Python script
 
