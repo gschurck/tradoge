@@ -102,7 +102,7 @@ def setup(config_obj, client):
             'name': 'buying_mode',
             'message': 'How do you want to buy ?',
             'choices': [
-                'Buy DOGE with a capped dollar amount',
+                'Buy DOGE with a fixed dollar amount',
                 'Buy a fixed DOGE amount',
             ]
         }
@@ -137,7 +137,7 @@ def setup(config_obj, client):
     answers = prompt(setup_questions)
     if answers['trading_pair'] == 'USDT' or answers['trading_pair'] == 'BUSD':
         answers_mode=prompt(setup_questions_buying_mode)
-        if answers_mode['buying_mode'] == 'Buy DOGE with a capped dollar amount':
+        if answers_mode['buying_mode'] == 'Buy DOGE with a fixed dollar amount':
             answers['buying_mode'] = 'USD'
             answers2 = prompt(setup_questions_USD)
         elif answers_mode['buying_mode'] == 'Buy a fixed DOGE amount':
