@@ -67,5 +67,5 @@ sudo apt-get install libatlas-base-dev
 
 ### Binance issues
 
-If TraDOGE show "CONNECTED TO YOUR BINANCE ACCOUNT" on login, everything should work on your account.
+If TraDOGE shows "CONNECTED TO YOUR BINANCE ACCOUNT" on login, everything should work on your account.
 Just make sure to use a sufficient amount of money when buying, or Binance can return an error.
