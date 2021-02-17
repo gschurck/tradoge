@@ -10,6 +10,8 @@ Tradoge is a Binance trading bot that instantly buys and sells DOGE cryptocurren
 - :closed_lock_with_key: Binance API keys are encrypted with a password using SHA-256
 - :gear: Full configuration can be changed easily in menu, without coding
 
+By default, TraDOGE ignores retweets, comments and citations to be safer. Main tweets have more impacts.
+
 ## Installing
 
 :information_source: I recommend to run tradoge in the [new Windows terminal](https://www.microsoft.com/fr-fr/p/windows-terminal/9n0dx20hk701) for full support of Unicode characters and better visual experience.
@@ -62,3 +64,8 @@ sudo apt-get install libatlas-base-dev
 ![alt text](https://github.com/gschurck/tradoge/blob/media/elon3.png?raw=true)
 ![alt text](https://github.com/gschurck/tradoge/blob/media/graph3.png?raw=true)
 **+8%**
+
+### Binance issues
+
+If TraDOGE show "CONNECTED TO YOUR BINANCE ACCOUNT" on login, everything should work on your account.
+Just make sure to use a sufficient amount of money when buying, or Binance can return an error.
