@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 print('Check dependencies...')
 import sys, subprocess
 
@@ -15,8 +16,9 @@ try:
     from PyInquirer import prompt
     from progress.bar import Bar
     from datetime import datetime
-    import threading
     from colorama import init, Fore
+    import threading
+
 except:
     subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
 
@@ -56,7 +58,6 @@ class SlowBar(Bar):
         return self.eta // 1
 
 def on_start():
-    # TODO import : pip3 install --user --upgrade git+https://github.com/twintproject/twint.git@origin/master#egg=twint
     # Decorations
     print(Fore.YELLOW)
     obj = timg.Renderer()                                                                                               
@@ -67,11 +68,16 @@ def on_start():
     print(Fore.RESET)
 
 
-def print_avg_price(client):
-    get = client.get_avg_price(symbol='DOGEUSDT')
-    print('Average price of DOGE in USD for the last '+ str(get['mins']) + ' minutes : \n' + Fore.YELLOW + str(get['price']) + " $" + Fore.RESET)
+def print_last_price(client):
+    get = client.get_symbol_ticker(symbol="DOGEUSDT")
+    print('Current DOGE price : \n' + Fore.YELLOW + str(get['price']) + " $" + Fore.RESET)
 
-def setup(config, client):
+def config_error(config, client):
+    print(Fore.RED + 'CONFIG ERROR' + Fore.RESET)
+    setup(config,client)
+
+def setup(config_obj, client):
+    print('Choose your configuration')
     setup_questions = [
         {
             'type': 'input',
@@ -88,39 +94,76 @@ def setup(config, client):
                 'BTC',
                 'EUR',
             ]
-        },
+        }
+    ]
+    setup_questions_buying_mode = [
+            {
+            'type': 'list',
+            'name': 'buying_mode',
+            'message': 'How do you want to buy ?',
+            'choices': [
+                'Buy DOGE with a capped dollar amount',
+                'Buy a fixed DOGE amount',
+            ]
+        }
+    ]
+    setup_questions_USD = [
         {
             'type': 'input',
             'name': 'quantity',
-            'message': 'How many DOGE coins do you want to buy when Elon tweets ?',
+            'message': 'How many dollars do you want to spend on DOGE when Elon tweets about it ? It can be a little less depending on the price but never more. (Enter an integer)',
         },
         {
             'type': 'input',
             'name': 'sell_delay',
             'message': 'After how many minutes do you want to sell ? 5min is recommended.',
-        },
+        }
     ]
-    print_avg_price(client)
-    answers = prompt(setup_questions)
-    if not (bool(answers['tweet_frequency']) & bool(answers['trading_pair']) & bool(answers['quantity']) & bool(answers['sell_delay'])):
-        sys.exit("Security Stop : Empty input")
+    setup_questions_DOGE = [
+        {
+            'type': 'input',
+            'name': 'quantity',
+            'message': 'How many DOGE coins do you want to buy when Elon tweets about it ?',
+        },
+        {
+            'type': 'input',
+            'name': 'sell_delay',
+            'message': 'After how many minutes do you want to sell ? 5min is recommended.',
+        }
+    ]
+    print_last_price(client)
     file_name='data/config.toml'
     data = toml.load(file_name)
-    data['tradoge']=answers
+    answers = prompt(setup_questions)
+    if answers['trading_pair'] == 'USDT' or answers['trading_pair'] == 'BUSD':
+        answers_mode=prompt(setup_questions_buying_mode)
+        if answers_mode['buying_mode'] == 'Buy DOGE with a capped dollar amount':
+            answers['buying_mode'] = 'USD'
+            answers2 = prompt(setup_questions_USD)
+        elif answers_mode['buying_mode'] == 'Buy a fixed DOGE amount':
+            answers['buying_mode'] = 'DOGE'
+            answers2 = prompt(setup_questions_DOGE)
+    else:
+        answers['buying_mode'] = 'DOGE'
+        answers2 = prompt(setup_questions_DOGE)
+    if not (bool(answers['tweet_frequency']) & bool(answers['trading_pair']) & bool(answers2['quantity']) & bool(answers2['sell_delay'])):
+        config_error(config_obj, client)
+    answers.update(answers2)
+    data['tradoge'].update(answers)
     with open(file_name, "w") as toml_file:
         toml.dump(data, toml_file)
-    menu(config, client)
+    menu(config_obj, client)
 
-def menu(nconfig, client):
+def menu(config_obj, client):
     on_start()
-    config = nconfig.get_toml()
+    config = config_obj.get_toml()
     doge_balance = client.get_asset_balance(asset='DOGE')['free']
     pair_balance = client.get_asset_balance(asset=config['tradoge']['trading_pair'])['free']
     print("\033[1m"+'> Current account balance : '+"\033[0m")
     print(Fore.YELLOW + str(doge_balance) + ' DOGE' + Fore.RESET)
     print(Fore.YELLOW + str(pair_balance) + ' '+ config['tradoge']['trading_pair'] + Fore.RESET)
-    print_avg_price(client)
-    price = client.get_avg_price(symbol='DOGEUSDT')['price']
+    print_last_price(client)
+    price = float(client.get_symbol_ticker(symbol='DOGEUSDT')['price'])
     doge_value = float(doge_balance) * float(price)
     doge_buy_value = round(int(config['tradoge']['quantity']) * float(price),2)
     
@@ -128,9 +171,28 @@ def menu(nconfig, client):
     print('')
     print("\033[1m"+'> Current configuration : '+"\033[0m")
     print('Tweets update frequency : \n' + Fore.YELLOW + config['tradoge']['tweet_frequency'] + ' seconds'+Fore.RESET)
-    print('Trading pair : \n' + Fore.YELLOW + 'DOGE/'+config['tradoge']['trading_pair'] +Fore.RESET)
-    print('Quantity of DOGE coins to buy & sell : \n' + Fore.YELLOW + config['tradoge']['quantity'] + ' DOGE' + Fore.RESET)
-    print(Fore.YELLOW + config['tradoge']['quantity']+' DOGE ≃ ' + str(doge_buy_value) + ' $'+Fore.RESET)
+    print('Trading pair : \n' + Fore.YELLOW + 'DOGE/' + config['tradoge']['trading_pair'] + Fore.RESET)
+    try:
+        if config['tradoge']['buying_mode'] == 'USD':
+            print('Amount to spend in dollars : \n' + Fore.YELLOW + config['tradoge']['quantity'] + ' $' + Fore.RESET)
+            if getattr( sys, 'frozen', False ):
+                # running in a bundle
+                print(Fore.YELLOW + config['tradoge']['quantity'] + ' $ = ' + str(doge_buyable_amount(config_obj, client)) + ' DOGE' + Fore.RESET)
+            else:
+                # running live
+                print(Fore.YELLOW + config['tradoge']['quantity'] + ' $ ≃ ' + str(doge_buyable_amount(config_obj, client)) + ' DOGE' + Fore.RESET)
+        elif config['tradoge']['buying_mode'] == 'DOGE':
+            print('Quantity of DOGE coins to buy & sell : \n' + Fore.YELLOW + config['tradoge']['quantity'] + ' DOGE' + Fore.RESET)
+            if getattr(sys, 'frozen', False):
+                # running in a bundle
+                print(Fore.YELLOW + config['tradoge']['quantity'] + ' DOGE = ' + str(doge_buy_value) + ' $' + Fore.RESET)
+            else:
+                # running live
+                print(Fore.YELLOW + config['tradoge']['quantity'] + ' DOGE ≃ ' + str(doge_buy_value) + ' $' + Fore.RESET)
+        else:
+            config_error(config_obj, client)
+    except KeyError:
+        config_error(config_obj,client)
     print('Delay before selling : \n' + Fore.YELLOW + config['tradoge']['sell_delay'] + ' mins'+Fore.RESET)
     print('')
 
@@ -144,10 +206,16 @@ def menu(nconfig, client):
     ]
     menu_answers=prompt(menu_questions)
     if menu_answers['start'] == 'Change config':
-        setup(nconfig, client)
+        setup(config_obj, client)
     elif menu_answers['start'] == 'Exit':
-        sys.exit("User exited from TraDOGE")
+        sys.exit("You have quit TraDOGE")
 
+def doge_buyable_amount(config_obj, client):
+    config = config_obj.get_toml()
+    price = float(client.get_symbol_ticker(symbol='DOGEUSDT')['price'])
+    quantity = int(config['tradoge']['quantity'])
+    amount = int(quantity // price)
+    return amount
 
 def signup():
     print('Welcome in TraDOGE !')
@@ -231,7 +299,7 @@ def login(config):
             if retry['retry'] == 'Setup new API keys':
                 client = signup()
             elif retry['retry'] == 'Exit':
-                sys.exit("User exited from TraDOGE")
+                sys.exit("You have quit TraDOGE")
     return client
 
 def encrypt_keys(api_key, secret_key, password):
@@ -287,24 +355,23 @@ def waiting():
 def main():
     on_start()
     # Binance credentials setup
-    new_config = Config()
-    config = new_config.get_toml()
+    config_obj = Config()
+    config = config_obj.get_toml()
     if config['binance']['secret_key'] and config['binance']['secret_key']:
-        client=login(new_config)
+        client=login(config_obj)
     else:
         client=signup()
     #client = Client(config.api_key, config.secret_key)
-    menu(new_config, client)
-    config = Config()
-    config = config.get_toml()
+    menu(config_obj, client)
+    config = config_obj.get_toml()
 
     # Declarations
     tweets = []
 
     c = twint.Config()
-    c.Username = "elonmusk"
+    c.Username = "grumsgrums"
     c.Search = "doge OR dogecoin"
-    c.Limit = 5
+    c.Limit = 2
     c.Store_object = True
     c.Store_object_tweets_list = tweets
     c.Hide_output = True
@@ -322,23 +389,27 @@ def main():
         tweet_datetime = datetime.strptime(tweets[0].datetime[:19], '%Y-%m-%d  %H:%M:%S')
         if lastTweet.id == tweets[0].id:
             print(datetime.now().strftime("%H:%M:%S")+" : Waiting for new DOGE tweet from Elon  (CTRL+C to stop)", end="\r")
+        elif tweet_datetime > lastTweet_datetime and '@' not in tweets[0].tweet:
+            if config['tradoge']['buying_mode'] == 'USD':
+                total = doge_buyable_amount(config_obj, client)
+            else:
+                total = int(config['tradoge']['quantity'])
 
-        elif tweet_datetime>lastTweet_datetime and '@' not in tweets[0].tweet:
             print("NEW TWEET")
             print(tweets[0].tweet)
             
             # Buy order
             #'''
             buy = client.order_market_buy(
-                symbol='DOGE'+ config['tradoge']['trading_pair'],
-                quantity=int(config['tradoge']['quantity']),
+                symbol = 'DOGE'+ config['tradoge']['trading_pair'],
+                quantity = total,
             )
             # Use limit order instead with a different price to test
             '''
             buy = client.order_limit_buy(
                 symbol='DOGE'+ config['tradoge']['trading_pair'],
-                quantity=int(config['tradoge']['quantity']),
-                price='0.04'
+                quantity=total,
+                price='0.03'
             )
             '''
             print(buy)
@@ -358,13 +429,13 @@ def main():
             #'''
             sell = client.order_market_sell(
                 symbol='DOGE'+ config['tradoge']['trading_pair'],
-                quantity=int(config['tradoge']['quantity']),
+                quantity=total,
             )
             # Use limit order instead with a different price to test
             '''
             sell = client.order_limit_sell(
                 symbol='DOGE'+ config['tradoge']['trading_pair'],
-                quantity=int(config['tradoge']['quantity']),
+                quantity=total,
                 price='0.1'
             )
             '''
