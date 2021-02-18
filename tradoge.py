@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+# Developed by Guillaume Schurck : https://github.com/gschurck
+# TraDOGE v1.2
+
 print('Check dependencies...')
 import sys, subprocess
 
@@ -16,9 +19,9 @@ try:
     from PyInquirer import prompt
     from progress.bar import Bar
     from datetime import datetime
-    from colorama import init, Fore
+    from colorama import init, Fore, Back
     import threading
-
+    import requests
 except:
     subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
 
@@ -56,6 +59,20 @@ class SlowBar(Bar):
     @property
     def remaining_seconds(self):
         return self.eta // 1
+
+
+def check_updates():
+    response = requests.get("https://api.github.com/repos/gschurck/tradoge/releases/latest")
+    tag_name=response.json()["tag_name"]
+    if tag_name != 'v1.2':
+        print(Back.BLUE + 'NEW UPDATE : ' + tag_name +Back.RESET)
+        print(Fore.BLUE + 'Please install new version of TraDOGE ' + tag_name)
+        print('Follow this link : https://github.com/gschurck/tradoge/releases/latest \n' + Fore.RESET)
+
+        body=response.json()["body"].partition('---')[0]
+        print(Fore.YELLOW+'New features : \n' + Fore.RESET + body +'\n\n')
+    else:
+        print(Fore.GREEN+'TraDOGE is up to date : '+tag_name+Fore.RESET+'\n')
 
 def on_start():
     # Decorations
@@ -218,6 +235,7 @@ def doge_buyable_amount(config_obj, client):
     return amount
 
 def signup():
+    check_updates()
     print('Welcome in TraDOGE !')
     while(True):
         ask_passwords = [
@@ -259,6 +277,7 @@ def signup():
     return Client(api_keys['api_key'], api_keys['secret_key'])
 
 def login(config):
+    check_updates()
     print('Your Binance API keys are present in config file')
     while(True):
         ask_password = [
@@ -364,6 +383,7 @@ def main():
     #client = Client(config.api_key, config.secret_key)
     menu(config_obj, client)
     config = config_obj.get_toml()
+
 
     # Declarations
     tweets = []
