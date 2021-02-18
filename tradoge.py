@@ -369,7 +369,7 @@ def main():
     tweets = []
 
     c = twint.Config()
-    c.Username = "grumsgrums"
+    c.Username = "elonmusk"
     c.Search = "doge OR dogecoin"
     c.Limit = 2
     c.Store_object = True
