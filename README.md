@@ -11,6 +11,7 @@ Tradoge is a Binance trading bot that instantly buys and sells DOGE cryptocurren
 - :gear: Full configuration can be changed easily in menu, without coding
   - Change tweet refresh frequency, trading pair, sell delay, buying mode and amount to buy
   - :heavy_dollar_sign: Choose between buy a fixed DOGE amount or an adaptative DOGE amount with a fixed dollar amount
+- :information_source: Checking for update at start-up
 
 By default, TraDOGE ignores retweets, comments and citations to be safer. Main tweets have more impact.
 
