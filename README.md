@@ -17,11 +17,14 @@ By default, TraDOGE ignores retweets, comments and citations to be safer. Main t
 
 ## Installing
 
-### Windows
-
 :information_source: I recommend to run tradoge in the [new Windows terminal](https://www.microsoft.com/fr-fr/p/windows-terminal/9n0dx20hk701) for full support of Unicode characters and better visual experience.
 
+### Windows
+
 :inbox_tray: [Download tradoge.zip](https://github.com/gschurck/tradoge/releases)
+
+- Download and unzip
+- Run `tradoge.exe`
 
 OR
 
