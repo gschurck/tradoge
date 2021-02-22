@@ -76,3 +76,21 @@ sudo apt-get install libatlas-base-dev
 
 If TraDOGE shows "CONNECTED TO YOUR BINANCE ACCOUNT" on login, everything should work on your account.
 Just make sure to use a sufficient amount of money when buying, or Binance can return an error.
+
+## Buy me a coffee
+
+If you want to support me, thank you !
+
+My crypto adresses :
+
+DOGE : `DJbbN3nYKMYneJuKU4QKicLjSfggToU4az`
+
+BTC : `bc1q20m4d3f2469q34wpprldhezhw5x4duxxgg7v27`
+
+ETH : `0x65700e91997e3e6320725ba081b028782d94eaca`
+
+USDT : `0x2C95a4aFFCb9A92e38Fcf0943A4ed314EC90bfCB`
+
+BNB : `bnb1q5g5zr8nxqk55lajesk0x4xf8r9yex795az6m4`
+
+XMR : `42VkGVJoQFPAWm5Km1rA1UiEt7hQMdaf9Z3ki1pBA9LR4iaoXDU9S1sMr1ik38HXAsgKvvw8442zKTHPj9dsDxkaGc4amVT`
