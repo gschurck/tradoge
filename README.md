@@ -1,4 +1,13 @@
 [![Github All Releases](https://img.shields.io/github/downloads/gschurck/tradoge/total.svg)]()
+
+Donate :
+<a href="https://paypal.me/pools/c/8xeXQlOHn3"><img src="https://logos-marques.com/wp-content/uploads/2020/01/Paypal-logo.png" alt="doge" width="100"/></a>
+<a href="https://coinrequest.io/request/cBKHRyzVpKuw5Cq"><img src="https://cryptologos.cc/logos/bitcoin-btc-logo.svg" alt="btc" width="50"/></a>
+<a href="https://coinrequest.io/request/tIr7sFblRGQ6PXo"><img src="https://cryptologos.cc/logos/ethereum-eth-logo.svg?v=010" alt="eth" width="50"/></a>
+<a href="https://coinrequest.io/request/PDkJ4IyL1JEw2Ab"><img src="https://cryptologos.cc/logos/tether-usdt-logo.svg?v=010" alt="usdt" width="50"/></a>
+<a href="https://coinrequest.io/request/bAOicJxeN6y76yF"><img src="https://cryptologos.cc/logos/dogecoin-doge-logo.svg?v=010" alt="doge" width="50"/></a>
+
+
 # :chart_with_upwards_trend: TraDOGE
 
 Tradoge is a Binance trading bot that instantly buys and sells DOGE cryptocurrency on Binance when Elon Musk tweets about it.
