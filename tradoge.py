@@ -64,13 +64,13 @@ class SlowBar(Bar):
 def check_updates():
     response = requests.get("https://api.github.com/repos/gschurck/tradoge/releases/latest")
     tag_name=response.json()["tag_name"]
-    if tag_name != 'v1.2':
+    if tag_name != 'v1.2.1':
         print(Back.BLUE + 'NEW UPDATE : ' + tag_name +Back.RESET)
         print(Fore.BLUE + 'Please install new version of TraDOGE ' + tag_name)
         print('Follow this link : https://github.com/gschurck/tradoge/releases/latest \n' + Fore.RESET)
 
         body=response.json()["body"].partition('---')[0]
-        print(Fore.YELLOW+'New features : \n' + Fore.RESET + body +'\n\n')
+        print(Fore.YELLOW+'New features : \n' + Fore.RESET + body +'\n')
     else:
         print(Fore.GREEN+'TraDOGE is up to date : '+tag_name+Fore.RESET+'\n')
 
@@ -173,6 +173,8 @@ def setup(config_obj, client):
 
 def menu(config_obj, client):
     on_start()
+    check_updates()
+
     config = config_obj.get_toml()
     doge_balance = client.get_asset_balance(asset='DOGE')['free']
     pair_balance = client.get_asset_balance(asset=config['tradoge']['trading_pair'])['free']
@@ -209,6 +211,7 @@ def menu(config_obj, client):
         else:
             config_error(config_obj, client)
     except KeyError:
+        #TODO FIX probleme affiche deux fois le menu après reconfig
         config_error(config_obj,client)
     print('Delay before selling : \n' + Fore.YELLOW + config['tradoge']['sell_delay'] + ' mins'+Fore.RESET)
     print('')
@@ -404,69 +407,88 @@ def main():
     w.start()
     '''
     while (True):
-        tweets.clear()
-        twint.run.Search(c)
-        tweet_datetime = datetime.strptime(tweets[0].datetime[:19], '%Y-%m-%d  %H:%M:%S')
-        if lastTweet.id == tweets[0].id:
-            print(datetime.now().strftime("%H:%M:%S")+" : Waiting for new DOGE tweet from Elon  (CTRL+C to stop)", end="\r")
-        elif tweet_datetime > lastTweet_datetime and '@' not in tweets[0].tweet:
-            if config['tradoge']['buying_mode'] == 'USD':
-                total = doge_buyable_amount(config_obj, client)
-            else:
-                total = int(config['tradoge']['quantity'])
+        try:
+            tweets.clear()
+            twint.run.Search(c)
+            tweet_datetime = datetime.strptime(tweets[0].datetime[:19], '%Y-%m-%d  %H:%M:%S')
 
-            print("NEW TWEET")
-            print(tweets[0].tweet)
-            
-            # Buy order
-            #'''
-            buy = client.order_market_buy(
-                symbol = 'DOGE'+ config['tradoge']['trading_pair'],
-                quantity = total,
-            )
-            # Use limit order instead with a different price to test
-            '''
-            buy = client.order_limit_buy(
-                symbol='DOGE'+ config['tradoge']['trading_pair'],
-                quantity=total,
-                price='0.03'
-            )
-            '''
-            print(buy)
-            print("ACHAT EFFECTUE")
-            
-            # Waiting time before selling, with progress bar
+            if lastTweet.id == tweets[0].id:
+                print(datetime.now().strftime("%H:%M:%S")+" : Waiting for new DOGE tweet from Elon  (CTRL+C to stop)", end="\r")
+            elif tweet_datetime > lastTweet_datetime and '@' not in tweets[0].tweet:
+                if config['tradoge']['buying_mode'] == 'USD':
+                    total = doge_buyable_amount(config_obj, client)
+                else:
+                    total = int(config['tradoge']['quantity'])
 
-            delay_seconds=int(config['tradoge']['sell_delay'])*60
-            bar = SlowBar('Waiting to sell ' + config['tradoge']['quantity'] + ' DOGE in '+ config['tradoge']['trading_pair'], max=delay_seconds)
-            for i in reversed(range(delay_seconds)):
+                print(Fore.YELLOW+"NEW TWEET"+Fore.RESET)
+                print(tweets[0].tweet)
+                
+                # Buy order
+                #'''
+                buy = client.order_market_buy(
+                    symbol = 'DOGE'+ config['tradoge']['trading_pair'],
+                    quantity = total,
+                )
+                price=float(client.get_symbol_ticker(symbol='DOGEUSDT')['price'])
+                # Use limit order instead with a different price to test
+                '''
+                buy = client.order_limit_buy(
+                    symbol='DOGE'+ config['tradoge']['trading_pair'],
+                    quantity=total,
+                    price='0.03'
+                )
+                '''
+                print(buy)
+                print(Fore.GREEN+'PURCHASE COMPLETED'+Fore.RESET)
+                buy_value=price*total
+                print(datetime.now().strftime("%H:%M:%S")+' TraDOGE bought ' + str(total) + ' DOGE ' + 'for a value of ' + str(round(buy_value,2))+' $\n')
+                # Waiting time before selling, with progress bar
+
+                delay_seconds = int(config['tradoge']['sell_delay']) * 60
+                bar = SlowBar('Waiting to sell ' + str(total) + ' DOGE in '+ config['tradoge']['trading_pair'], max=delay_seconds)
+                for i in reversed(range(delay_seconds)):
+                    time.sleep(1)
+                    bar.next()
+                bar.finish()
+                #time.sleep(int(answers['sell_delay'])*60)
+
+                # Sell order
+                #'''
+                sell = client.order_market_sell(
+                    symbol='DOGE'+ config['tradoge']['trading_pair'],
+                    quantity=total,
+                )
+                price=float(client.get_symbol_ticker(symbol='DOGEUSDT')['price'])
+                # Use limit order instead with a different price to test
+                '''
+                sell = client.order_limit_sell(
+                    symbol='DOGE'+ config['tradoge']['trading_pair'],
+                    quantity=total,
+                    price='0.1'
+                )
+                '''
+                sell_value=price*total
+                print(sell)
+                print(Fore.GREEN+'SALE COMPLETED'+Fore.RESET)
+                print(datetime.now().strftime("%H:%M:%S") + ' TraDOGE sold ' + str(total) + ' DOGE ' + ' for a value of ' + str(round(sell_value,2)) + '\n')
+                profit=sell_value-buy_value
+                print(Fore.GREEN+'PROFIT : '+str(round(profit,2))+' $'+ Fore.RESET+'\n')
+
+            # Check new tweet every x seconds
+            time.sleep(int(config['tradoge']['tweet_frequency']))
+            lastTweet = tweets[0]
+            lastTweet_datetime = tweet_datetime
+        except Exception as e:
+            print(Fore.RED + '\nERROR :\n' + Fore.RESET)
+            print(e)
+            print('\n')
+            bar = SlowBar('Restarting the program in ', max=10)
+            for i in reversed(range(10)):
                 time.sleep(1)
                 bar.next()
             bar.finish()
-            #time.sleep(int(answers['sell_delay'])*60)
-
-            # Sell order
-            #'''
-            sell = client.order_market_sell(
-                symbol='DOGE'+ config['tradoge']['trading_pair'],
-                quantity=total,
-            )
-            # Use limit order instead with a different price to test
-            '''
-            sell = client.order_limit_sell(
-                symbol='DOGE'+ config['tradoge']['trading_pair'],
-                quantity=total,
-                price='0.1'
-            )
-            '''
-            print(sell)
-            print('Sold')
             print('\n')
-
-        # Check new tweet every x seconds
-        time.sleep(int(config['tradoge']['tweet_frequency']))
-        lastTweet = tweets[0]
-        lastTweet_datetime=tweet_datetime
+            pass
 
 
 if __name__ == "__main__":
