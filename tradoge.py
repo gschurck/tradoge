@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Developed by Guillaume Schurck : https://github.com/gschurck
-# TraDOGE v1.2
+# TraDOGE v1.2.1
 
 print('Check dependencies...')
 import sys, subprocess
