@@ -1,4 +1,4 @@
-
+.idea/
 src/twint/
-
+venv/
 *.toml
