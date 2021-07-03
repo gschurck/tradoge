@@ -2,8 +2,10 @@
 # Developed by Guillaume Schurck : https://github.com/gschurck
 # TraDOGE v1.2.2
 
+import subprocess
+import sys
+
 print('Check dependencies...')
-import sys, subprocess
 
 try:
     import base64
@@ -22,6 +24,7 @@ try:
     from colorama import init, Fore, Back
     import threading
     import requests
+    import logging
 except:
     subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
 
@@ -33,6 +36,17 @@ except ImportError:
     import twint
 
 init(convert=True)
+
+logger = logging.getLogger('Error log')
+logging.basicConfig(filename='error.log', filemode='w', level=logging.ERROR)
+
+
+def log_exception(type, value, tb):
+    sys.__excepthook__(type, value, tb)
+    logger.critical("Fatal error", exc_info=(type, value, tb))
+
+
+sys.excepthook = log_exception
 
 
 # Config class for retrieving Binance credentials from .toml file
@@ -132,6 +146,18 @@ def setup(config_obj, client):
         }
     ]
     setup_questions_usd = [
+        {
+            'type': 'input',
+            'name': 'quantity',
+            'message': 'How many dollars do you want to spend on DOGE when Elon tweets about it ? It can be a little less depending on the price but never more. (Enter an integer)',
+        },
+        {
+            'type': 'input',
+            'name': 'sell_delay',
+            'message': 'After how many minutes do you want to sell ? 5min is recommended.',
+        }
+    ]
+    setup_questions_btc = [
         {
             'type': 'input',
             'name': 'quantity',
@@ -312,7 +338,7 @@ def login(config):
         password = prompt(ask_password)
         if password['password'] == 'RESET':
             client = signup()
-            break;
+            break
         try:
             api_key, secret_key = decrypt_keys(config, password['password'])
         except:
@@ -541,3 +567,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

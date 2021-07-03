@@ -2,3 +2,4 @@
 src/
 venv/
 *.toml
+error.log
