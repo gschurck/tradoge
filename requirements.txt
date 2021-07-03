@@ -19,7 +19,7 @@ setuptools == 47.1.0
 spinners == 0.0.24
 timg == 1.1.5
 toml == 0.10.2
-twint == 2.1.20
+twint == 2.1.21
 numpy~=1.20.1
 Pillow~=8.1.2
 colorama~=0.4.4
