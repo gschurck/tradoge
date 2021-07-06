@@ -2,8 +2,10 @@
 # Developed by Guillaume Schurck : https://github.com/gschurck
 # TraDOGE v1.2.2
 
+import subprocess
+import sys
+
 print('Check dependencies...')
-import sys, subprocess
 
 try:
     import base64
@@ -22,6 +24,7 @@ try:
     from colorama import init, Fore, Back
     import threading
     import requests
+    import logging
 except:
     subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
 
@@ -33,6 +36,17 @@ except ImportError:
     import twint
 
 init(convert=True)
+
+logger = logging.getLogger('Error log')
+logging.basicConfig(filename='error.log', filemode='w', level=logging.ERROR)
+
+
+def log_exception(type, value, tb):
+    sys.__excepthook__(type, value, tb)
+    logger.critical("Fatal error", exc_info=(type, value, tb))
+
+
+sys.excepthook = log_exception
 
 
 # Config class for retrieving Binance credentials from .toml file
@@ -143,6 +157,18 @@ def setup(config_obj, client):
             'message': 'After how many minutes do you want to sell ? 5min is recommended.',
         }
     ]
+    setup_questions_btc = [
+        {
+            'type': 'input',
+            'name': 'quantity',
+            'message': 'How many dollars do you want to spend on DOGE when Elon tweets about it ? It can be a little less depending on the price but never more. (Enter an integer)',
+        },
+        {
+            'type': 'input',
+            'name': 'sell_delay',
+            'message': 'After how many minutes do you want to sell ? 5min is recommended.',
+        }
+    ]
     setup_questions_doge = [
         {
             'type': 'input',
@@ -185,8 +211,8 @@ def menu(config_obj, client):
     check_updates()
 
     config = config_obj.get_toml()
-    doge_balance = client.get_asset_balance(asset='DOGE')['free']
-    pair_balance = client.get_asset_balance(asset=config['tradoge']['trading_pair'])['free']
+    doge_balance = client.get_asset_balance(asset='DOGE') or 0
+    pair_balance = client.get_asset_balance(asset=config['tradoge']['trading_pair'])['free'] or 0
     print("\033[1m" + '> Current account balance : ' + "\033[0m")
     print(Fore.YELLOW + str(doge_balance) + ' DOGE' + Fore.RESET)
     print(Fore.YELLOW + str(pair_balance) + ' ' + config['tradoge']['trading_pair'] + Fore.RESET)
@@ -312,7 +338,7 @@ def login(config):
         password = prompt(ask_password)
         if password['password'] == 'RESET':
             client = signup()
-            break;
+            break
         try:
             api_key, secret_key = decrypt_keys(config, password['password'])
         except:

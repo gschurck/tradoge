@@ -1,4 +1,6 @@
-
-src/twint/
-
+.idea/
+src/
+venv/
 *.toml
+error.log
+testkeys
