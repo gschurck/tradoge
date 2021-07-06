@@ -3,3 +3,4 @@ src/
 venv/
 *.toml
 error.log
+testkeys

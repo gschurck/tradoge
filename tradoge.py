@@ -211,8 +211,8 @@ def menu(config_obj, client):
     check_updates()
 
     config = config_obj.get_toml()
-    doge_balance = client.get_asset_balance(asset='DOGE')['free']
-    pair_balance = client.get_asset_balance(asset=config['tradoge']['trading_pair'])['free']
+    doge_balance = client.get_asset_balance(asset='DOGE') or 0
+    pair_balance = client.get_asset_balance(asset=config['tradoge']['trading_pair'])['free'] or 0
     print("\033[1m" + '> Current account balance : ' + "\033[0m")
     print(Fore.YELLOW + str(doge_balance) + ' DOGE' + Fore.RESET)
     print(Fore.YELLOW + str(pair_balance) + ' ' + config['tradoge']['trading_pair'] + Fore.RESET)
@@ -567,4 +567,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
