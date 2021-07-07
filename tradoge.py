@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Developed by Guillaume Schurck : https://github.com/gschurck
-# TraDOGE v1.2.3
+# TraDOGE v1.3
 
 import subprocess
 import sys
