@@ -50,9 +50,12 @@ except:
     try:
         import twint
     except ImportError:
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "--user", "--upgrade",
-                               "git+https://github.com/twintproject/twint.git@origin/master#egg=twint"])
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "--user", "--upgrade", "git+https://github.com/twintproject/twint.git@origin/master#egg=twint"])
         import twint
+
+if twint.__version__ != "2.1.21":
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "--user", "--upgrade", "git+https://github.com/twintproject/twint.git@origin/master#egg=twint"])
+    import twint
 
 print("All dependencies are imported")
 
