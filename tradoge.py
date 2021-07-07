@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 # Developed by Guillaume Schurck : https://github.com/gschurck
-# TraDOGE v1.2.2
+# TraDOGE v1.2.3
 
 import subprocess
 import sys
+import base64
+import time
 
 print('Check dependencies...')
 
 try:
-    import base64
-    import os
+    print("Importing packages...")
     from cryptography.fernet import Fernet
     from cryptography.hazmat.primitives import hashes
     from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-    import time
     import timg
     import toml
     from art import tprint
@@ -25,15 +25,36 @@ try:
     import threading
     import requests
     import logging
-except:
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
+    import twint
 
-try:
-    import twint
-except ImportError:
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "--user", "--upgrade",
-                           "git+https://github.com/twintproject/twint.git@origin/master#egg=twint"])
-    import twint
+except:
+    print("Downloading missing packages")
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
+    print("Packages installed")
+    print("Importing packages")
+    from cryptography.fernet import Fernet
+    from cryptography.hazmat.primitives import hashes
+    from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+    import timg
+    import toml
+    from art import tprint
+    from binance.client import Client
+    from PyInquirer import prompt
+    from progress.bar import Bar
+    from datetime import datetime
+    from colorama import init, Fore, Back
+    import threading
+    import requests
+    import logging
+
+    try:
+        import twint
+    except ImportError:
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "--user", "--upgrade",
+                               "git+https://github.com/twintproject/twint.git@origin/master#egg=twint"])
+        import twint
+
+print("All dependencies are imported")
 
 init(convert=True)
 
@@ -211,7 +232,7 @@ def menu(config_obj, client):
     check_updates()
 
     config = config_obj.get_toml()
-    doge_balance = client.get_asset_balance(asset='DOGE') or 0
+    doge_balance = client.get_asset_balance(asset='DOGE')['free'] or 0
     pair_balance = client.get_asset_balance(asset=config['tradoge']['trading_pair'])['free'] or 0
     print("\033[1m" + '> Current account balance : ' + "\033[0m")
     print(Fore.YELLOW + str(doge_balance) + ' DOGE' + Fore.RESET)
