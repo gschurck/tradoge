@@ -26,7 +26,7 @@ Tradoge is a Binance trading bot that instantly buys and sells DOGE cryptocurren
 
 By default, TraDOGE ignores retweets, comments and citations to be safer. Main tweets have more impact.
 
-## Installing
+## Installation
 
 :information_source: I recommend to run tradoge in the [new Windows terminal](https://www.microsoft.com/fr-fr/p/windows-terminal/9n0dx20hk701) for full support of Unicode characters and better visual experience.
 
