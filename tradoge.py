@@ -6,6 +6,7 @@ import subprocess
 import sys
 import base64
 import time
+import os
 
 print('Check dependencies...')
 
