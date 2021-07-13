@@ -515,12 +515,12 @@ def main():
 
             try:
                 # Buy order
-                '''
+
                 buy = client.order_market_buy(
                     symbol='DOGE' + config['tradoge']['trading_pair'],
                     quantity=total,
                 )
-                '''
+
                 price = float(client.get_symbol_ticker(symbol='DOGEUSDT')['price'])
                 # Use limit order instead with a different price to test
                 '''
@@ -530,7 +530,7 @@ def main():
                     price='0.03'
                 )
                 '''
-                # print(buy)
+                print(buy)
                 print(Fore.GREEN + 'PURCHASE COMPLETED' + Fore.RESET)
                 buy_value = price * total
                 print(datetime.now().strftime("%H:%M:%S") + ' TraDOGE bought ' + str(
