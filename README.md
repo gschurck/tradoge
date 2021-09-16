@@ -47,10 +47,7 @@ OR
 ```bash
 git clone https://github.com/gschurck/tradoge.git
 cd tradoge
-python -m pip install -r requirements.txt
-```
-**Then run :**
-```bash
+pip install -r requirements.txt
 cd ..
 tradoge.py
 ```
@@ -58,7 +55,7 @@ tradoge.py
 
 **If you have errors with twint import, try :**
 ```bash
-pip3 install --upgrade -e git+https://github.com/twintproject/twint.git@origin/master#egg=twint
+pip install --upgrade -e git+https://github.com/twintproject/twint.git@origin/master#egg=twint
 ```
 **On Raspberry Py, numpy import can cause an error. Try :**
 ```bash
