@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Developed by Guillaume Schurck : https://github.com/gschurck
-# TraDOGE v1.3.2
+# TraDOGE v1.3.3
 
 import subprocess
 import sys
@@ -107,7 +107,7 @@ class SlowBar(Bar):
 def check_updates():
     response = requests.get("https://api.github.com/repos/gschurck/tradoge/releases/latest")
     tag_name = response.json()["tag_name"]
-    if tag_name != 'v1.3.2':
+    if tag_name != 'v1.3.3':
         print(Back.BLUE + 'NEW UPDATE : ' + tag_name + Back.RESET)
         print(Fore.BLUE + 'Please install new version of TraDOGE ' + tag_name)
         print('Follow this link : https://github.com/gschurck/tradoge/releases/latest \n' + Fore.RESET)
