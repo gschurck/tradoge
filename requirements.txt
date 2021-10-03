@@ -19,5 +19,5 @@ timg ~= 1.1.5
 toml ~= 0.10.2
 twint @ git+https://github.com/twintproject/twint.git@origin/master#egg=twint
 numpy~=1.20.1
-Pillow~=8.1.2
+Pillow>=8.3.2
 colorama~=0.4.4
