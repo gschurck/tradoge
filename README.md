@@ -48,7 +48,6 @@ OR
 git clone https://github.com/gschurck/tradoge.git
 cd tradoge
 pip install -r requirements.txt
-cd ..
 tradoge.py
 ```
 :warning: If you experience issues during installation try to restart the script a few times.
