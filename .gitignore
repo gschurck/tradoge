@@ -4,3 +4,4 @@ venv/
 *.toml
 error.log
 testkeys
+__pycache__/
