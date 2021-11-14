@@ -40,3 +40,14 @@ def futures_sell(client, config, total):
     config_tradoge = config['tradoge']
     client.futures_create_order(symbol=f"DOGE{config_tradoge['futures_trading_pair']}", type='MARKET', side='SELL',
                                 quantity=total)
+
+
+def futures_trailing_stop_loss(client, config, total):
+    config_tradoge = config['tradoge']
+    client.futures_create_order("BTCUSDT",
+                                type="TRAILING_STOP_MARKET",
+                                callbackRate=1,
+                                side='SELL',
+                                quantity=total,
+                                #activationPrice=price * 1.01,
+                                reduceOnly='true')

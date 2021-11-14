@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Developed by Guillaume Schurck : https://github.com/gschurck
-
+import time
 
 from imports import *
 
@@ -31,6 +31,7 @@ class Config:
             binance = self.config["binance"]
             self.api_key = binance["api_key"]
             self.secret_key = binance["secret_key"]
+        # TODO add key verif
 
     def get_toml(self):
         self.config = toml.load('data/config.toml')
@@ -52,13 +53,15 @@ def restart_on_error(exception, seconds):
     print('\n')
     pass
 
-def wait(config_tradoge, total , trading_pair):
+
+def wait(config_tradoge, total, trading_pair):
     delay_seconds = int(config_tradoge['sell_delay']) * 60
     bar = SlowBar('Waiting to sell ' + str(total) + ' DOGE in ' + trading_pair, max=delay_seconds)
     for i in reversed(range(delay_seconds)):
         time.sleep(1)
         bar.next()
     bar.finish()
+
 
 def main():
     on_start()
@@ -70,16 +73,14 @@ def main():
     else:
         client = signup()
 
-
     # client = Client(config.api_key, config.secret_key)
     # client.futures_change_margin_type(symbol='DOGEUSDT', marginType='ISOLATED')
     # client.futures_change_leverage(symbol='DOGEUSDT', leverage=2)
     # print(futures_buy(config, client))
-    #a=client2.futures_account()
+    # a=client2.futures_account()
     menu(client, config)
     config = config_obj.get_toml()
-
-
+    config_tradoge=config['tradoge']
     # Declarations
     tweets = []
 
@@ -128,8 +129,9 @@ def main():
                 print(datetime.now().strftime("%H:%M:%S") + ' TraDOGE bought ' + str(
                     total) + ' DOGE ' + 'for a value of ' + str(round(buy_value, 2)) + ' $\n')
 
-                    # Waiting time before selling, with progress bar
+                # Waiting time before selling, with progress bar
 
+                wait(config_tradoge, total, config_tradoge['spot_trading_pair'])
                 delay_seconds = int(config['tradoge']['sell_delay']) * 60
                 bar = SlowBar('Waiting to sell ' + str(total) + ' DOGE in ' + config['tradoge']['spot_trading_pair'],
                               max=delay_seconds)
@@ -178,6 +180,12 @@ def main():
 
             elif config['tradoge']['market'] == "Futures":
                 futures_buy(client, config, total)
+                time.sleep(10)
+                if float(config_tradoge['trailing_stop']) > 0:
+                    futures_trailing_stop_loss(client, config, total)
+                else:
+                    wait(config_tradoge, total, config_tradoge['futures_trading_pair'])
+                    futures_sell(client, config, total)
 
         # Check new tweet every x seconds
         time.sleep(int(config['tradoge']['tweet_frequency']))

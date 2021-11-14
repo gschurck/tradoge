@@ -58,8 +58,6 @@ if twint.__version__ != "2.1.21":
     import twint
 
 
-
-
 from _version import version
 from CONSTANTS import *
 from data_storage import *

@@ -261,7 +261,12 @@ def display_spot_dashboard(client, config):
 
 
 def display_futures_dashboard(client, config):
+    '''
     print(client.futures_create_order(symbol='BTCUSDT', type='MARKET', side='BUY', quantity=1))
+    import time
+    time.sleep(10)
+    futures_trailing_stop_loss(client, config, 1)
+    '''
     config_tradoge = config['tradoge']
     pair_balance = 0
 
