@@ -5,7 +5,6 @@ import time
 import os
 
 print('Check dependencies...')
-testMode = True
 
 try:
     print("Importing packages...")
@@ -24,6 +23,7 @@ try:
     import requests
     import logging
     import twint
+    import platform
 
 except:
     print("Downloading missing packages")
@@ -57,10 +57,13 @@ if twint.__version__ != "2.1.21":
                            "git+https://github.com/twintproject/twint.git@origin/master#egg=twint"])
     import twint
 
+
+
+
 from _version import version
+from CONSTANTS import *
 from data_storage import *
 from ui import *
 from menu import *
 from trading import *
-
-
+from tradoge import *

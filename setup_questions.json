@@ -1,0 +1,110 @@
+{
+    "start": [
+        {
+            "type": "input",
+            "name": "tweet_frequency",
+            "message": "At what frequency do you want to check if there is a new tweet from Elon Musk ? (seconds)"
+        },
+        {
+            "type": "list",
+            "name": "market",
+            "message": "Do you want to trade on Spot or Futures market ?",
+            "choices": [
+                "Spot",
+                "Futures"
+            ]
+        }
+    ],
+    "spot_trading_pair": {
+        "type": "list",
+        "name": "spot_trading_pair",
+        "message": "Which trading pair do you want to use ? DOGE/",
+        "choices": [
+            "USDT",
+            "BUSD",
+            "BTC",
+            "EUR"
+        ]
+    },
+    "futures": [
+        {
+            "type": "list",
+            "name": "futures_contract_type",
+            "message": "Choose a margin type",
+            "choices": [
+                "USDⓈ-M",
+                "COIN-M"
+            ]
+        },
+        {
+            "type": "list",
+            "name": "futures_trading_pair",
+            "message": "Which perpetual contract do you want to use ? DOGE/",
+            "choices": [
+                "USDT",
+                "BUSD"
+            ]
+        },
+        {
+            "type": "list",
+            "name": "futures_margin_mode",
+            "message": "Choose a margin mode :",
+            "choices": [
+                "Isolated",
+                "Crossed"
+            ]
+        },
+        {
+            "type": "input",
+            "name": "futures_leverage",
+            "message": "Choose the leverage (min: 1, max: 50) :"
+        }
+    ],
+    "setup_questions_buying_mode": [
+        {
+            "type": "list",
+            "name": "buying_mode",
+            "message": "How do you want to buy ?",
+            "choices": [
+                "Buy DOGE with a fixed dollar amount",
+                "Buy a fixed DOGE amount"
+            ]
+        }
+    ],
+    "setup_questions_usd": [
+        {
+            "type": "input",
+            "name": "quantity",
+            "message": "How many dollars do you want to spend on DOGE when Elon tweets about it ? It can be a little less depending on the price but never more. (Enter an integer)"
+        },
+        {
+            "type": "input",
+            "name": "sell_delay",
+            "message": "After how many minutes do you want to sell ? 5min is recommended."
+        }
+    ],
+    "setup_questions_btc": [
+        {
+            "type": "input",
+            "name": "quantity",
+            "message": "How many dollars do you want to spend on DOGE when Elon tweets about it ? It can be a little less depending on the price but never more. (Enter an integer)"
+        },
+        {
+            "type": "input",
+            "name": "sell_delay",
+            "message": "After how many minutes do you want to sell ? 5min is recommended."
+        }
+    ],
+    "setup_questions_doge": [
+        {
+            "type": "input",
+            "name": "quantity",
+            "message": "How many DOGE coins do you want to buy when Elon tweets about it ?"
+        },
+        {
+            "type": "input",
+            "name": "sell_delay",
+            "message": "After how many minutes do you want to sell ? 5min is recommended."
+        }
+    ]
+}

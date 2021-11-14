@@ -1,5 +1,6 @@
 from imports import *
 
+
 class SlowBar(Bar):
     suffix = Fore.YELLOW + '%(remaining_minutes)d minutes ' + Fore.RESET + ' (%(remaining_seconds)d seconds)'
     fill = Fore.YELLOW + '$' + Fore.RESET
@@ -11,6 +12,7 @@ class SlowBar(Bar):
     @property
     def remaining_seconds(self):
         return self.eta // 1
+
 
 def on_start():
     # Decorations
