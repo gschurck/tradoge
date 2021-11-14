@@ -62,6 +62,6 @@ from _version import version
 from CONSTANTS import *
 from data_storage import *
 from ui import *
-from menu import *
 from trading import *
+from menu import *
 from tradoge import *

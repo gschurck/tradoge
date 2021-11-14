@@ -34,40 +34,25 @@ def doge_buyable_amount(client, config_tradoge):
     return amount
 
 
-def update_binance_account_futures_config(client, config_tradoge):
-    for position in client.futures_account()['positions']:
-        if position['symbol'] == f"DOGE{config_tradoge['futures_trading_pair']}":
-            if (position['isolated'] and config_tradoge['futures_margin_mode'] != "Isolated") or (
-                    not position['isolated'] and config_tradoge['futures_margin_mode'] != "Crossed"):
-                client.futures_change_margin_type(symbol=f"DOGE{config_tradoge['futures_trading_pair']}",
-                                                  marginType=config_tradoge['futures_margin_mode'].upper())
-            print(position)
-
-    client.futures_change_leverage(symbol=f"DOGE{config_tradoge['futures_trading_pair']}",
-                                   leverage=config_tradoge['futures_leverage'])
-
-
 def setup(client, config):
     config_tradoge = config['tradoge']
     print('Choose your configuration')
 
     setup_questions = {
-        'start': [
-            {
-                'type': 'input',
-                'name': 'tweet_frequency',
-                'message': 'At what frequency do you want to check if there is a new tweet from Elon Musk ? (seconds)',
-            },
-            {
-                'type': 'list',
-                'name': 'market',
-                'message': 'Do you want to trade on Spot or Futures market ?',
-                'choices': [
-                    'Spot',
-                    'Futures',
-                ]
-            }
-        ],
+        'market': {
+            'type': 'list',
+            'name': 'market',
+            'message': 'Do you want to trade on Spot or Futures market ?',
+            'choices': [
+                'Spot',
+                'Futures',
+            ]
+        },
+        'tweet_frequency': {
+            'type': 'input',
+            'name': 'tweet_frequency',
+            'message': 'At what frequency do you want to check if there is a new tweet from Elon Musk ? (seconds)',
+        },
         'spot_trading_pair': {
             'type': 'list',
             'name': 'spot_trading_pair',
@@ -78,6 +63,11 @@ def setup(client, config):
                 'BTC',
                 'EUR',
             ]
+        },
+        'futures_trailing_stop': {
+            'type': 'input',
+            'name': 'futures_trailing_stop',
+            'message': "If you want to use trailing stop loss to sell, enter % number (0 if you don't want)",
         },
         'futures': [
             {
@@ -111,8 +101,9 @@ def setup(client, config):
                 'type': 'input',
                 'name': 'futures_leverage',
                 'message': 'Choose the leverage (min: 1, max: 50) :',
-            }
+            },
         ],
+
         'setup_questions_buying_mode': [
             {
                 'type': 'list',
@@ -169,36 +160,48 @@ def setup(client, config):
     def ask_buying_mode():
         answers_mode = prompt(setup_questions['setup_questions_buying_mode'])
         if answers_mode['buying_mode'] == 'Buy DOGE with a fixed dollar amount':
-            answers_start['buying_mode'] = 'USD'
+            answers_market['buying_mode'] = 'USD'
             answers2 = prompt(setup_questions['setup_questions_usd'])
         elif answers_mode['buying_mode'] == 'Buy a fixed DOGE amount':
-            answers_start['buying_mode'] = 'DOGE'
+            answers_market['buying_mode'] = 'DOGE'
             answers2 = prompt(setup_questions['setup_questions_doge'])
         return answers2
 
     print_last_price(client)
 
-    answers_start = prompt(setup_questions['start'])
-    if answers_start['market'] == 'Spot':  # SPOT
+    answers_market = prompt(setup_questions['market'])
+    if answers_market['market'] == 'Spot':  # SPOT
+        answer_frequency = prompt(setup_questions['tweet_frequency'])
         answer_trading_pair = prompt(setup_questions['spot_trading_pair'])
-        if answers_start['trading_pair'] == 'USDT' or answers_start['trading_pair'] == 'BUSD':
+        if answer_trading_pair['spot_trading_pair'] == 'USDT' or answer_trading_pair['spot_trading_pair'] == 'BUSD':
             answers2 = ask_buying_mode()
         else:
-            answers_start['buying_mode'] = 'DOGE'
+            answers_market['buying_mode'] = 'DOGE'
             answers2 = prompt(setup_questions['setup_questions_doge'])
 
-        if not (bool(answers_start['tweet_frequency']) & bool(answers_start['spot_trading_pair']) & bool(
+        if not (bool(answer_frequency['tweet_frequency']) & bool(answer_trading_pair['spot_trading_pair']) & bool(
                 answers2['quantity']) & bool(answers2['sell_delay'])):
             config_error(client, config)
-    elif answers_start['market'] == 'Futures':  # FUTURES
+
+    elif answers_market['market'] == 'Futures':  # FUTURES
+        answer_trailing = prompt(setup_questions['futures_trailing_stop'])
+        print(type(answer_trailing['futures_trailing_stop']))
+        if answer_trailing['futures_trailing_stop'] == 0 or answer_trailing['futures_trailing_stop'] == "0":
+            answer_frequency = prompt(setup_questions['tweet_frequency'])
+
         answer_futures = prompt(setup_questions['futures'])
         print(answer_futures)
         answers2 = ask_buying_mode()
 
-    config_tradoge.update(answers_start) if "answers_start" in locals() else None
-    config_tradoge.update(answers2) if "answers2" in locals() else None
-    config_tradoge.update(answer_trading_pair) if "answer_trading_pair" in locals() else None
-    config_tradoge.update(answer_futures) if "answer_futures" in locals() else None
+    def check_and_update_array(array, string):
+        config_tradoge.update(array) if string in locals() else None
+
+    check_and_update_array(answers_market, "answer_market")
+    check_and_update_array(answers2, "answers2")
+    check_and_update_array(answer_trading_pair, "answer_trading_pair")
+    check_and_update_array(answer_futures, "answer_futures")
+    check_and_update_array(answer_frequency, "answer_frequency")
+    check_and_update_array(answer_trailing, "answer_trailing")
 
     save_data(config)
 
@@ -265,8 +268,12 @@ def display_futures_dashboard(client, config):
     print(client.futures_create_order(symbol='BTCUSDT', type='MARKET', side='BUY', quantity=1))
     import time
     time.sleep(10)
-    futures_trailing_stop_loss(client, config, 1)
+    print(futures_trailing_stop_loss(client, config, 1, 1))
     '''
+    #print(futures_trailing_stop_loss(client, config, 0.2, 1))
+    print(client.futures_position_information(symbol="BTCUSDT"))
+    print(client.futures_get_open_orders(symbol="BTCUSDT"))
+
     config_tradoge = config['tradoge']
     pair_balance = 0
 

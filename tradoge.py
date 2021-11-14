@@ -121,7 +121,8 @@ def main():
 
             if config['tradoge']['market'] == "Spot":
 
-                price = spot_buy(client, config, total)
+                buy = spot_buy(client, config, total)
+                price = float(client.get_symbol_ticker(symbol='DOGEUSDT')['price'])
 
                 # print(buy)
                 print(Fore.GREEN + 'PURCHASE COMPLETED' + Fore.RESET)
@@ -179,10 +180,25 @@ def main():
                 sell_doge(total, reduce_amount)
 
             elif config['tradoge']['market'] == "Futures":
-                futures_buy(client, config, total)
-                time.sleep(10)
-                if float(config_tradoge['trailing_stop']) > 0:
-                    futures_trailing_stop_loss(client, config, total)
+                buy = futures_buy(client, config, total)
+                print(Fore.GREEN + 'PURCHASE COMPLETED' + Fore.RESET)
+                price = float(client.futures_symbol_ticker(symbol='DOGEUSDT')['price'])
+                buy_value = price * total
+                print(datetime.now().strftime("%H:%M:%S") + ' TraDOGE bought ' + str(
+                    total) + ' DOGE ' + 'for a value of ' + str(round(buy_value, 2)) + ' $\n')
+                trailing_stop = float(config_tradoge['trailing_stop'])
+                if trailing_stop > 0:
+                    time.sleep(1)
+                    futures_trailing_stop_loss(client, config, total, trailing_stop)
+                    print("Trailing stop started")
+                    # TODO for loop to find the position
+                    print("Liquidation Price : "+client.futures_position_information(symbol="DOGE....")[0]['liquidationPrice'])
+                    # TODO
+                    while float(client.futures_position_information(symbol="DOGE....")) >= total:
+                        print("You are still in profit, waiting for % drop") # TODO
+                        print("Current PNL : "+client.futures_position_information(symbol="DOGE....")[0]['unRealizedProfit'])
+                        print("")
+
                 else:
                     wait(config_tradoge, total, config_tradoge['futures_trading_pair'])
                     futures_sell(client, config, total)
