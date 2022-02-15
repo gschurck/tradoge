@@ -1,18 +1,28 @@
 # -*- coding: utf-8 -*-
 # Developed by Guillaume Schurck : https://github.com/gschurck
+
+import os
+import sys
 import time
 
-from imports import *
+import logging
+import platform
+import toml
+from colorama import Fore, init
 
-print("All dependencies are imported")
+import twitter
+import ui
+import menu
+from trading import process_spot, process_futures
 
+# colorama
 if platform.system() == "Linux":
     init()
 else:
     init(convert=True)
 
-logger = logging.getLogger('Error log')
-logging.basicConfig(filename='error.log', filemode='w', level=logging.ERROR)
+logger = logging.getLogger("Error log")
+logging.basicConfig(filename="error.log", filemode="w", level=logging.ERROR)
 
 
 def log_exception(type, value, tb):
@@ -26,185 +36,93 @@ sys.excepthook = log_exception
 # Config class for retrieving Binance credentials from .toml file
 class Config:
     def __init__(self):
-        self.config = toml.load('data/config.toml')
-        if self.config["binance"]:
+        self.config = toml.load("data/config.toml")
+        if "binance" in self.config:
             binance = self.config["binance"]
             self.api_key = binance["api_key"]
             self.secret_key = binance["secret_key"]
         # TODO add key verif
 
     def get_toml(self):
-        self.config = toml.load('data/config.toml')
-        binance = self.config["binance"]
-        self.api_key = binance["api_key"]
-        self.secret_key = binance["secret_key"]
+        self.config = toml.load("data/config.toml")
+        if "binance" in self.config:
+            binance = self.config["binance"]
+            self.api_key = binance["api_key"]
+            self.secret_key = binance["secret_key"]
         return self.config
 
 
 def restart_on_error(exception, seconds):
-    print(Fore.RED + '\nERROR :\n' + Fore.RESET)
+    print(Fore.RED + "\nERROR :\n" + Fore.RESET)
     print(exception)
-    print('\n')
-    bar = SlowBar('Restarting the program in ', max=seconds)
+    print("\n")
+    bar = ui.SlowBar("Restarting the program in ", max=seconds)
     for i in reversed(range(seconds)):
         time.sleep(1)
         bar.next()
     bar.finish()
-    print('\n')
+    print("\n")
     pass
 
 
-def wait(config_tradoge, total, trading_pair):
-    delay_seconds = int(config_tradoge['sell_delay']) * 60
-    bar = SlowBar('Waiting to sell ' + str(total) + ' DOGE in ' + trading_pair, max=delay_seconds)
-    for i in reversed(range(delay_seconds)):
-        time.sleep(1)
-        bar.next()
-    bar.finish()
+def process_new_tweet(client):
+    config_obj = Config()
+    config = config_obj.get_toml()
+    config_tradoge = config['tradoge']
+
+    if config["tradoge"]["buying_mode"] == "USD":
+        total = menu.doge_buyable_amount(config_obj, client)
+    else:
+        total = int(config["tradoge"]["quantity"])
+
+    if config["tradoge"]["market"] == "Spot":
+        process_spot(client, config, total)
+
+    elif config["tradoge"]["market"] == "Futures":
+        process_futures(client, config, total)
 
 
 def main():
-    on_start()
+    print("All dependencies are imported")
+
+    tradoge_stream = twitter.TradogeSearchStream(bearer_token=os.environ["TWITTER_BEARER_TOKEN"], client=None)
+    print(twitter.configure_stream_filter_rule(tradoge_stream))
+    print(tradoge_stream.get_rules().data[0].value)
+    print(tradoge_stream.search_stream())
+
+    ui.on_start()
     # Binance credentials setup
     config_obj = Config()
     config = config_obj.get_toml()
-    if config['binance']['secret_key'] and config['binance']['secret_key']:
-        client = login(config_obj)
+    if config["binance"]["secret_key"] and config["binance"]["secret_key"]:
+        client = menu.login(config_obj)
     else:
-        client = signup()
+        client = menu.signup()
 
     # client = Client(config.api_key, config.secret_key)
     # client.futures_change_margin_type(symbol='DOGEUSDT', marginType='ISOLATED')
     # client.futures_change_leverage(symbol='DOGEUSDT', leverage=2)
     # print(futures_buy(config, client))
     # a=client2.futures_account()
-    menu(client, config)
+    menu.open_menu(client, config)
     config = config_obj.get_toml()
-    config_tradoge=config['tradoge']
+    config_tradoge = config["tradoge"]
     # Declarations
-    tweets = []
-
-    c = twint.Config()
-    c.Username = "elonmusk"
-    c.Search = "doge OR dogecoin"
-    c.Limit = 2
-    c.Store_object = True
-    c.Store_object_tweets_list = tweets
-    c.Hide_output = True
-    c.Filter_retweets = True
-    twint.run.Search(c)
-    last_tweet = tweets[0]
-    last_tweet_datetime = datetime.strptime(tweets[0].datetime[:19], '%Y-%m-%d  %H:%M:%S')
 
     while True:
         try:
-            tweets.clear()
-            twint.run.Search(c)
-            tweet_datetime = datetime.strptime(tweets[0].datetime[:19], '%Y-%m-%d  %H:%M:%S')
+            tradoge_stream = twitter.TradogeSearchStream(
+                bearer_token=os.environ["TWITTER_BEARER_TOKEN"],
+                client=client
+            )
         except Exception as e:
             restart_on_error(e, 60)
-
+        """
         if last_tweet.id == tweets[0].id:
             print(datetime.now().strftime("%H:%M:%S") + " : Waiting for new DOGE tweet from Elon  (CTRL+C to stop)",
                   end="\r")
         elif tweet_datetime > last_tweet_datetime and '@' not in tweets[0].tweet:
-            last_tweet = tweets[0]
-            last_tweet_datetime = tweet_datetime
-
-            if config['tradoge']['buying_mode'] == 'USD':
-                total = doge_buyable_amount(config_obj, client)
-            else:
-                total = int(config['tradoge']['quantity'])
-
-            print(Fore.YELLOW + "NEW TWEET" + Fore.RESET)
-            print(tweets[0].tweet)
-
-            if config['tradoge']['market'] == "Spot":
-
-                buy = spot_buy(client, config, total)
-                price = float(client.get_symbol_ticker(symbol='DOGEUSDT')['price'])
-
-                # print(buy)
-                print(Fore.GREEN + 'PURCHASE COMPLETED' + Fore.RESET)
-                buy_value = price * total
-                print(datetime.now().strftime("%H:%M:%S") + ' TraDOGE bought ' + str(
-                    total) + ' DOGE ' + 'for a value of ' + str(round(buy_value, 2)) + ' $\n')
-
-                # Waiting time before selling, with progress bar
-
-                wait(config_tradoge, total, config_tradoge['spot_trading_pair'])
-                delay_seconds = int(config['tradoge']['sell_delay']) * 60
-                bar = SlowBar('Waiting to sell ' + str(total) + ' DOGE in ' + config['tradoge']['spot_trading_pair'],
-                              max=delay_seconds)
-                for i in reversed(range(delay_seconds)):
-                    time.sleep(1)
-                    bar.next()
-                bar.finish()
-
-                reduce_amount = 0
-
-                def sell_doge(sell_total, reduce):
-                    try:
-                        # Sell order
-                        sell = client.order_market_sell(
-                            symbol='DOGE' + config['tradoge']['spot_trading_pair'],
-                            quantity=sell_total,
-                        )
-
-                        # Use limit order instead with a different price to test
-                        """
-                        sell = client.order_limit_sell(
-                            symbol='DOGE'+ config['tradoge']['spot_trading_pair'],
-                            quantity=total,
-                            price='0.1'
-                        )
-                        """
-                    except Exception as sellError:
-                        # sell less DOGE in case of insufficient balance
-                        print(Fore.RED + 'SELL ERROR : \n' + Fore.RESET + str(sellError))
-                        print('Retrying to sell with 10 DOGE less...')
-                        reduce += 10
-                        print('Selling ' + str(total - reduce) + ' DOGE...')
-                        time.sleep(1)
-                        sell_doge(total - reduce, reduce)
-
-                    price = float(client.get_symbol_ticker(symbol='DOGEUSDT')['price'])
-                    sell_value = price * sell_total
-                    print(sell)
-                    print(Fore.GREEN + 'SALE COMPLETED' + Fore.RESET)
-                    print(datetime.now().strftime("%H:%M:%S") + ' TraDOGE sold ' + str(
-                        sell_total) + ' DOGE ' + ' for a value of ' + str(round(sell_value, 2)) + '\n')
-                    profit = sell_value - buy_value
-                    print(Fore.GREEN + 'PROFIT : ' + str(round(profit, 2)) + ' $' + Fore.RESET + '\n')
-
-                sell_doge(total, reduce_amount)
-
-            elif config['tradoge']['market'] == "Futures":
-                buy = futures_buy(client, config, total)
-                print(Fore.GREEN + 'PURCHASE COMPLETED' + Fore.RESET)
-                price = float(client.futures_symbol_ticker(symbol='DOGEUSDT')['price'])
-                buy_value = price * total
-                print(datetime.now().strftime("%H:%M:%S") + ' TraDOGE bought ' + str(
-                    total) + ' DOGE ' + 'for a value of ' + str(round(buy_value, 2)) + ' $\n')
-                trailing_stop = float(config_tradoge['trailing_stop'])
-                if trailing_stop > 0:
-                    time.sleep(1)
-                    futures_trailing_stop_loss(client, config, total, trailing_stop)
-                    print("Trailing stop started")
-                    # TODO for loop to find the position
-                    print("Liquidation Price : "+client.futures_position_information(symbol="DOGE....")[0]['liquidationPrice'])
-                    # TODO
-                    while float(client.futures_position_information(symbol="DOGE....")) >= total:
-                        print("You are still in profit, waiting for % drop") # TODO
-                        print("Current PNL : "+client.futures_position_information(symbol="DOGE....")[0]['unRealizedProfit'])
-                        print("")
-
-                else:
-                    wait(config_tradoge, total, config_tradoge['futures_trading_pair'])
-                    futures_sell(client, config, total)
-
-        # Check new tweet every x seconds
-        time.sleep(int(config['tradoge']['tweet_frequency']))
+        """
 
 
 if __name__ == "__main__":

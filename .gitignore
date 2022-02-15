@@ -5,3 +5,4 @@ venv/
 error.log
 testkeys
 __pycache__/
+data/config.toml

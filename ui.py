@@ -1,4 +1,9 @@
-from imports import *
+import time
+
+import timg
+from art import tprint
+from colorama import Fore
+from progress.bar import Bar
 
 
 class SlowBar(Bar):
@@ -23,3 +28,13 @@ def on_start():
     obj.render(timg.ASCIIMethod)
     tprint("TraDOGE", "font: varsity")
     print(Fore.RESET)
+
+
+def print_loading_bar(message, delay_seconds):
+    bar = SlowBar(
+        message, max=delay_seconds
+    )
+    for i in reversed(range(delay_seconds)):
+        time.sleep(1)
+        bar.next()
+    bar.finish()

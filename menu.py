@@ -1,4 +1,32 @@
-from imports import *
+import sys
+import time
+
+import requests
+import toml
+from PyInquirer import prompt
+from binance import Client
+from colorama import Fore, Back
+
+import data_storage
+import ui
+from CONSTANTS import testMode, DOGEUSDT
+from _version import version
+
+class Config:
+    def __init__(self):
+        self.config = toml.load('data/config.toml')
+        if self.config["binance"]:
+            binance = self.config["binance"]
+            self.api_key = binance["api_key"]
+            self.secret_key = binance["secret_key"]
+        # TODO add key verif
+
+    def get_toml(self):
+        self.config = toml.load('data/config.toml')
+        binance = self.config["binance"]
+        self.api_key = binance["api_key"]
+        self.secret_key = binance["secret_key"]
+        return self.config
 
 
 def check_updates():
@@ -152,10 +180,11 @@ def setup(client, config):
             }
         ]
     }
-
+    '''
     for asset in client.futures_account()['assets']:
         if asset['asset'] == "DOGE":
             print(asset)
+    '''
 
     def ask_buying_mode():
         answers_mode = prompt(setup_questions['setup_questions_buying_mode'])
@@ -194,18 +223,22 @@ def setup(client, config):
         answers2 = ask_buying_mode()
 
     def check_and_update_array(array, string):
-        config_tradoge.update(array) if string in locals() else None
+        config['tradoge'].update(array)  # if string in locals() else print("no: "+string)
 
     check_and_update_array(answers_market, "answer_market")
     check_and_update_array(answers2, "answers2")
-    check_and_update_array(answer_trading_pair, "answer_trading_pair")
-    check_and_update_array(answer_futures, "answer_futures")
+    if answers_market['market'] == 'Spot':
+        check_and_update_array(answer_trading_pair, "answer_trading_pair")
+    elif answers_market['market'] == 'Futures':
+        check_and_update_array(answer_futures, "answer_futures")
     check_and_update_array(answer_frequency, "answer_frequency")
     check_and_update_array(answer_trailing, "answer_trailing")
 
-    save_data(config)
+    data_storage.save_data(config)
 
-    menu(client, config)
+    config_obj = Config()
+    config = config_obj.get_toml()
+    open_menu(client, config)
 
 
 def display_spot_dashboard(client, config):
@@ -215,8 +248,12 @@ def display_spot_dashboard(client, config):
     print(client.get_account())
     '''
     # LIVE if else TEST, needed for Binance Testnet
-    doge_balance = (client.get_asset_balance(asset='DOGE')['free'] or 0) if (not testMode) else (
-            client.get_asset_balance(asset='TRX')['free'] or 0)
+    try:
+        doge_balance = (client.get_asset_balance(asset='DOGE')['free'] or 0) if (not testMode) else (
+                client.get_asset_balance(asset='TRX')['free'] or 0)
+    except TypeError as e:
+        print(e)
+        print("-> You probably don't have any cryptocurrencies on your Binance account (or at least DOGE)")
     pair_balance = (client.get_asset_balance(asset=config_tradoge['spot_trading_pair'])['free'] or 0) if (
         not testMode) else (client.get_asset_balance(asset='BUSD')['free'] or 0)
     print(f"Market : {config_tradoge['market']}")
@@ -270,7 +307,7 @@ def display_futures_dashboard(client, config):
     time.sleep(10)
     print(futures_trailing_stop_loss(client, config, 1, 1))
     '''
-    #print(futures_trailing_stop_loss(client, config, 0.2, 1))
+    # print(futures_trailing_stop_loss(client, config, 0.2, 1))
     print(client.futures_position_information(symbol="BTCUSDT"))
     print(client.futures_get_open_orders(symbol="BTCUSDT"))
 
@@ -334,9 +371,9 @@ def display_futures_dashboard(client, config):
     print('Delay before selling : \n' + Fore.YELLOW + config_tradoge['sell_delay'] + ' mins' + Fore.RESET)
 
 
-def menu(client, config):
+def open_menu(client, config):
     config_tradoge = config['tradoge']
-    on_start()
+    ui.on_start()
     check_updates()
 
     if config_tradoge['market'] == "Spot":
@@ -364,6 +401,19 @@ def menu(client, config):
 def signup():
     check_updates()
     print('Welcome in TraDOGE !')
+    ask_trading_mode = [
+        {
+            'type': 'list',
+            'name': 'market',
+            'message': 'Do you want to trade on Spot or Futures market ? (default : Spot)',
+            'choices': [
+                'Spot',
+                'Futures',
+            ]
+        }
+    ]
+    data_storage.save_data_to_tradoge(prompt(ask_trading_mode))
+
     while True:
         ask_passwords = [
             {
@@ -398,7 +448,7 @@ def signup():
     api_keys = prompt(ask_api_keys)
     api_key = api_keys['api_key']
     secret_key = api_keys['secret_key']
-    encrypt_keys(api_key, secret_key, passwords['password1'])
+    data_storage.encrypt_keys(api_key, secret_key, passwords['password1'])
     print(
         "Your keys are encrypted using SHA-256 and stored in config.toml file \nDon't forget your password or you "
         "will need to create new API keys")
@@ -422,7 +472,7 @@ def login(config):
             client = signup()
             break
         try:
-            api_key, secret_key = decrypt_keys(config, password['password'])
+            api_key, secret_key = data_storage.decrypt_keys(config, password['password'])
         except:
             print(Fore.RED + 'PASSWORD IS WRONG. Try again \n' + Fore.RESET)
             time.sleep(1)
@@ -430,6 +480,7 @@ def login(config):
             time.sleep(1)
             continue
         client = Client(api_key, secret_key, testnet=testMode)
+        client.API_URL= 'https://testnet.binancefuture.com'
         if client.get_system_status()['status'] == 0:
             print(Fore.GREEN + 'CONNECTED TO YOUR BINANCE ACCOUNT' + Fore.RESET)
             time.sleep(1)

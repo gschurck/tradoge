@@ -1,6 +1,30 @@
-from imports import *
+import base64
+import os
+
+import toml
+
+from cryptography.fernet import Fernet
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 file_path = 'data/config.toml'
+
+
+class Config:
+    def __init__(self):
+        self.config = toml.load('data/config.toml')
+        if self.config["binance"]:
+            binance = self.config["binance"]
+            self.api_key = binance["api_key"]
+            self.secret_key = binance["secret_key"]
+        # TODO add key verif
+
+    def get_toml(self):
+        self.config = toml.load('data/config.toml')
+        binance = self.config["binance"]
+        self.api_key = binance["api_key"]
+        self.secret_key = binance["secret_key"]
+        return self.config
 
 
 def get_data():
@@ -8,8 +32,21 @@ def get_data():
 
 
 def save_data(data):
+    print(data)
     with open(file_path, "w") as toml_file:
         toml.dump(data, toml_file)
+    print('Saved data to file')
+
+
+def save_data_to_tradoge(data):
+    config_obj = Config()
+    config = config_obj.get_toml()
+
+    config['tradoge'].update(data)
+    print(data)
+    with open(file_path, "w") as toml_file:
+        toml.dump(config, toml_file)
+    print('Saved data to file')
 
 
 def encrypt_keys(api_key, secret_key, password):
@@ -50,7 +87,3 @@ def decrypt_keys(config, password):
     secret_token = bytes(config['binance']['secret_key'])
 
     return f.decrypt(api_token).decode("utf-8"), f.decrypt(secret_token).decode("utf-8")
-
-
-def testpackage():
-    print("TESTPACKAGE------------------------------------------------------")

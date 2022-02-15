@@ -1,8 +1,5 @@
 import subprocess
 import sys
-import base64
-import time
-import os
 
 print('Check dependencies...')
 
@@ -22,8 +19,9 @@ try:
     import threading
     import requests
     import logging
-    import twint
     import platform
+    from pytwitter import Api, StreamApi
+
 
 except:
     print("Downloading missing packages")
@@ -51,17 +49,3 @@ except:
         subprocess.check_call([sys.executable, "-m", "pip", "install", "--user", "--upgrade",
                                "git+https://github.com/twintproject/twint.git@origin/master#egg=twint"])
         import twint
-
-if twint.__version__ != "2.1.21":
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "--user", "--upgrade",
-                           "git+https://github.com/twintproject/twint.git@origin/master#egg=twint"])
-    import twint
-
-
-from _version import version
-from CONSTANTS import *
-from data_storage import *
-from ui import *
-from trading import *
-from menu import *
-from tradoge import *
