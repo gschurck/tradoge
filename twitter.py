@@ -13,9 +13,10 @@ TWITTER_QUERY = f"doge from:{TWITTER_USERNAME} OR dogecoin from:{TWITTER_USERNAM
 
 # TODO remove None
 class TradogeSearchStream(StreamApi):
-    def __init__(self, bearer_token, client=None):
+    def __init__(self, bearer_token, client):
         super().__init__(bearer_token=bearer_token)
         self.client = client
+        print(self.client)
 
     def on_tweet(self, tweet):
         print(Fore.YELLOW + "NEW TWEET" + Fore.RESET)
@@ -24,7 +25,7 @@ class TradogeSearchStream(StreamApi):
 
 
 # TODO remove None
-def configure_stream_filter_rule(bearer_token, client=None):
+def configure_stream_filter_rule(bearer_token, client):
     stream_api = TradogeSearchStream(
         bearer_token=os.environ["TWITTER_BEARER_TOKEN"], client=client
     )

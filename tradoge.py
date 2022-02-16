@@ -13,7 +13,8 @@ from colorama import Fore, init
 import twitter
 import ui
 import menu
-from trading import process_spot, process_futures
+from CONSTANTS import DOGEUSDT
+from trading import process_spot, process_futures, futures_doge_buyable_amount
 
 # colorama
 if platform.system() == "Linux":
@@ -66,30 +67,36 @@ def restart_on_error(exception, seconds):
 
 
 def process_new_tweet(client):
+    print("Processing new tweet")
+    print(client.futures_symbol_ticker(symbol="BTCUSDT"))
     config_obj = Config()
     config = config_obj.get_toml()
     config_tradoge = config['tradoge']
-
-    if config["tradoge"]["buying_mode"] == "USD":
-        total = menu.doge_buyable_amount(config_obj, client)
-    else:
-        total = int(config["tradoge"]["quantity"])
-
+    print("Config loaded")
+    print(config["tradoge"]["market"])
     if config["tradoge"]["market"] == "Spot":
-        process_spot(client, config, total)
-
+        if config["tradoge"]["buying_mode"] == "USD":
+            total = menu.doge_buyable_amount(client=client, config_tradoge=config_tradoge)
+            print("Total : " + str(total))
+        else:
+            total = int(config["tradoge"]["quantity"])
+            print("Total2 : " + str(total))
+        process_spot(client=client, config=config, total=total)
     elif config["tradoge"]["market"] == "Futures":
-        process_futures(client, config, total)
+        if config["tradoge"]["buying_mode"] == "USD":
+            total = futures_doge_buyable_amount(client=client, config_tradoge=config_tradoge)
+            print("Total : " + str(total))
+        process_futures(client=client, config=config, total=total)
 
 
 def main():
     print("All dependencies are imported")
-
+    """
     tradoge_stream = twitter.TradogeSearchStream(bearer_token=os.environ["TWITTER_BEARER_TOKEN"], client=None)
     print(twitter.configure_stream_filter_rule(tradoge_stream))
     print(tradoge_stream.get_rules().data[0].value)
     print(tradoge_stream.search_stream())
-
+    """
     ui.on_start()
     # Binance credentials setup
     config_obj = Config()
@@ -115,6 +122,7 @@ def main():
                 bearer_token=os.environ["TWITTER_BEARER_TOKEN"],
                 client=client
             )
+            print(tradoge_stream.search_stream())
         except Exception as e:
             restart_on_error(e, 60)
         """

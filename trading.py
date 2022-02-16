@@ -5,6 +5,7 @@ from datetime import datetime
 
 import ui
 import tradoge
+from CONSTANTS import DOGEUSDT
 
 
 def update_binance_account_futures_config(client, config_tradoge):
@@ -141,6 +142,7 @@ def spot_sell(client, config, sell_total, reduced_amount, buy_value):
 
 
 def process_futures(client, config, total):
+    print("Processing futures...")
     config_tradoge = config["tradoge"]
     print("buying")
     buy = futures_buy(client, config, total)
@@ -159,21 +161,23 @@ def process_futures(client, config, total):
     trailing_stop = float(config_tradoge["trailing_stop"])
     if trailing_stop > 0:
         time.sleep(1)
+
         futures_trailing_stop_loss(client, config, total, trailing_stop)
         print("Trailing stop started")
         # TODO for loop to find the position
         print(
             "Liquidation Price : "
-            + client.futures_position_information(symbol="DOGE....")[0][
+            + client.futures_position_information(symbol="DOGE" + config_tradoge['futures_trading_pair'])[0][
                 "liquidationPrice"
             ]
         )
         # TODO
-        while float(client.futures_position_information(symbol="DOGE....")) >= total:
+        while float(
+                client.futures_position_information(symbol="DOGE" + config_tradoge['futures_trading_pair'])) >= total:
             print("You are still in profit, waiting for % drop")  # TODO
             print(
                 "Current PNL : "
-                + client.futures_position_information(symbol="DOGE....")[0][
+                + client.futures_position_information(symbol="DOGE" + config_tradoge['futures_trading_pair'])[0][
                     "unRealizedProfit"
                 ]
             )
@@ -182,6 +186,16 @@ def process_futures(client, config, total):
     else:
         wait(config_tradoge, total, config_tradoge["futures_trading_pair"])
         futures_sell(client, config, total)
+
+
+def futures_doge_buyable_amount(client, config_tradoge):
+    print("doge buyable amount")
+    print(client.futures_symbol_ticker(symbol="BTCUSDT"))
+    price = float(client.futures_symbol_ticker(symbol="BTCUSDT")['price'])
+    print("price : " + str(price))
+    quantity = int(config_tradoge['quantity'])
+    amount = int(quantity // price)
+    return amount
 
 
 def futures_buy(client, config, total):
@@ -225,4 +239,6 @@ def futures_trailing_stop_loss(client, config, total, callback_rate):
 
 def wait(config_tradoge, total, trading_pair):
     delay_seconds = int(config_tradoge["sell_delay"]) * 60
-    ui.print_loading_bar("Waiting to sell " + str(total) + " DOGE in " + trading_pair, delay_seconds)
+    ui.print_loading_bar(
+        "Waiting to sell " + str(total) + " DOGE in " + trading_pair, delay_seconds
+    )

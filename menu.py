@@ -12,6 +12,7 @@ import ui
 from CONSTANTS import testMode, DOGEUSDT
 from _version import version
 
+
 class Config:
     def __init__(self):
         self.config = toml.load('data/config.toml')
@@ -30,6 +31,8 @@ class Config:
 
 
 def check_updates():
+    # TODO uncomment
+    '''
     response = requests.get("https://api.github.com/repos/gschurck/tradoge/releases/latest")
     tag_name = response.json()["tag_name"]
     if tag_name != version:
@@ -41,6 +44,7 @@ def check_updates():
         print(Fore.YELLOW + 'Changelog : \n' + Fore.RESET + body + '\n')
     else:
         print(Fore.GREEN + 'TraDOGE is up to date : ' + tag_name + Fore.RESET + '\n')
+    '''
     if testMode:
         print(f"{Fore.RED}TESTMODE{Fore.RESET}")
 
@@ -57,6 +61,7 @@ def config_error(client, config):
 
 def doge_buyable_amount(client, config_tradoge):
     price = float(client.get_symbol_ticker(symbol=DOGEUSDT)['price'])
+    print("price : " + str(price))
     quantity = int(config_tradoge['quantity'])
     amount = int(quantity // price)
     return amount
@@ -308,9 +313,11 @@ def display_futures_dashboard(client, config):
     print(futures_trailing_stop_loss(client, config, 1, 1))
     '''
     # print(futures_trailing_stop_loss(client, config, 0.2, 1))
+    '''
     print(client.futures_position_information(symbol="BTCUSDT"))
     print(client.futures_get_open_orders(symbol="BTCUSDT"))
-
+    '''
+    print(client.futures_symbol_ticker(symbol="BTCUSDT"))
     config_tradoge = config['tradoge']
     pair_balance = 0
 
@@ -480,7 +487,7 @@ def login(config):
             time.sleep(1)
             continue
         client = Client(api_key, secret_key, testnet=testMode)
-        client.API_URL= 'https://testnet.binancefuture.com'
+        client.API_URL = 'https://testnet.binancefuture.com'
         if client.get_system_status()['status'] == 0:
             print(Fore.GREEN + 'CONNECTED TO YOUR BINANCE ACCOUNT' + Fore.RESET)
             time.sleep(1)
