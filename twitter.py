@@ -16,19 +16,22 @@ TWITTER_QUERY = f"doge from:{TWITTER_USERNAME} OR dogecoin from:{TWITTER_USERNAM
 
 # TODO remove None
 class TradogeSearchStream(StreamApi):
-    def __init__(self, bearer_token, client, ping_url):
+    def __init__(self, bearer_token, client, ping_uptime_url, ping_new_tweet_url):
         super().__init__(bearer_token=bearer_token)
         self.client = client
-        self.ping_url = ping_url
+        self.ping_uptime_url = ping_uptime_url
+        self.ping_new_tweet_url = ping_new_tweet_url
 
     def on_tweet(self, tweet):
         print(Fore.YELLOW + "NEW TWEET" + Fore.RESET)
         print(tweet)
         tradoge.process_new_tweet(self.client)
+        if self.ping_new_tweet_url:
+            ping_new_tweet(self.ping_new_tweet_url)
 
     def on_keep_alive(self):
-        if self.ping_url:
-            ping_uptime(self.ping_url, "", None)
+        if self.ping_uptime_url:
+            ping_uptime(self.ping_uptime_url, "", None)
 
 
 # TODO remove None
@@ -83,6 +86,14 @@ def ping_uptime(ping_url, endpoint, message):
         urllib.request.urlopen(request, timeout=10)
         print("Last Twitter connection check : " + Fore.GREEN + datetime.now().strftime("%H:%M:%S") + Fore.RESET,
               end="\r")
+    except socket.error as e:
+        # Log ping failure here...
+        print("Ping failed: %s" % e)
+
+
+def ping_new_tweet(ping_url):
+    try:
+        urllib.request.urlopen(ping_url, timeout=10)
     except socket.error as e:
         # Log ping failure here...
         print("Ping failed: %s" % e)

@@ -31,8 +31,6 @@ class Config:
 
 
 def check_updates():
-    # TODO uncomment
-    '''
     response = requests.get("https://api.github.com/repos/gschurck/tradoge/releases/latest")
     tag_name = response.json()["tag_name"]
     if tag_name != version:
@@ -44,7 +42,6 @@ def check_updates():
         print(Fore.YELLOW + 'Changelog : \n' + Fore.RESET + body + '\n')
     else:
         print(Fore.GREEN + 'TraDOGE is up to date : ' + tag_name + Fore.RESET + '\n')
-    '''
     if testMode:
         print(f"{Fore.RED}TESTMODE{Fore.RESET}")
 
@@ -310,8 +307,10 @@ def display_spot_dashboard(client, config):
 
 
 def display_futures_dashboard(client, config):
+    '''
     print(client.futures_account_balance(symbol="USDT"))
     print(client.futures_get_all_orders())
+    '''
     '''
     trailing = client.futures_create_order(
         symbol="DOGEUSDT",
@@ -349,7 +348,7 @@ def display_futures_dashboard(client, config):
 
     for asset in client.futures_account()['assets']:
         if asset['asset'] == "USDT":
-            print(asset)
+            # print(asset)
             pair_balance = asset['walletBalance']
 
     # LIVE if else TEST, needed for Binance Testnet
@@ -370,7 +369,11 @@ def display_futures_dashboard(client, config):
     print("\033[1m" + '> Current configuration : ' + "\033[0m")
     print(f"Market : {Fore.YELLOW + config_tradoge['market'] + Fore.RESET}")
     print(f"Contract type : {Fore.YELLOW + config_tradoge['futures_contract_type'] + Fore.RESET}")
-    print(f"Margin mode : {Fore.YELLOW + config_tradoge['futures_margin_mode'] + Fore.RESET}\n")
+    print(f"Margin mode : {Fore.YELLOW + config_tradoge['futures_margin_mode'] + Fore.RESET}")
+    print(f"Leverage : {Fore.YELLOW}x{config_tradoge['futures_leverage'] + Fore.RESET}")
+    if config_tradoge['futures_trailing_stop']:
+        print(f"Trailing stop : {Fore.YELLOW + config_tradoge['futures_trailing_stop']}%{Fore.RESET}")
+    print("")
     print('Tweets update frequency : ' + Fore.YELLOW + config_tradoge['tweet_frequency'] + ' seconds' + Fore.RESET)
     print('Trading pair : ' + Fore.YELLOW + 'DOGE/' + config_tradoge['futures_trading_pair'] + Fore.RESET)
     try:

@@ -115,17 +115,18 @@ def main():
     menu.open_menu(client, config)
     config = config_obj.get_toml()
     config_tradoge = config["tradoge"]
-    ping_url = config["twitter"]["ping_url"]
+    ping_uptime_url = config["twitter"]["ping_uptime_url"]
 
     tradoge_stream = twitter.TradogeSearchStream(
         bearer_token=config['twitter']['bearer_token'],
         client=client,
-        ping_url=ping_url
+        ping_uptime_url=ping_uptime_url,
+        ping_new_tweet_url=config["twitter"]["ping_new_tweet_url"],
     )
     twitter.configure_stream_filter_rule(tradoge_stream)
 
     print("Waiting for new DOGE tweet from Elon Musk  (CTRL+C to stop)", end="\n\n")
-    twitter.ping_uptime(ping_url, "/start", None)
+    twitter.ping_uptime(ping_uptime_url, "/start", None)
 
     while True:
         try:
@@ -133,7 +134,7 @@ def main():
         except Exception as e:
             if CONSTANTS.testMode:
                 raise e
-            twitter.ping_uptime(ping_url, "/fail", str(e))
+            twitter.ping_uptime(ping_uptime_url, "/fail", str(e))
             restart_on_error(e, 60)
         """
         if last_tweet.id == tweets[0].id:

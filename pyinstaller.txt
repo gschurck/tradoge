@@ -1,0 +1,1 @@
+path\to\pyinstaller.exe --onefile --paths path\to\venv\Lib\site-packages file.py
