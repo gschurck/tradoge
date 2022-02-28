@@ -60,7 +60,10 @@ def config_error(client, config):
 
 
 def doge_buyable_amount(client, config_tradoge):
-    price = float(client.get_symbol_ticker(symbol=DOGEUSDT)['price'])
+    if config_tradoge['market'] == "Spot":
+        price = float(client.get_symbol_ticker(symbol=DOGEUSDT)['price'])
+    else:
+        price = float(client.futures_symbol_ticker(symbol=DOGEUSDT)['price'])
     print("price : " + str(price))
     quantity = int(config_tradoge['quantity'])
     amount = int(quantity // price)
@@ -299,13 +302,37 @@ def display_spot_dashboard(client, config):
                     Fore.YELLOW + config_tradoge['quantity'] + ' DOGE ≃ ' + str(doge_buy_value) + ' $' + Fore.RESET)
         else:
             config_error(client, config)
-    except KeyError:
+    except KeyError as e:
+        print(e)
         # TODO FIX probleme affiche deux fois le menu après reconfig
         config_error(client, config)
     print('Delay before selling : \n' + Fore.YELLOW + config_tradoge['sell_delay'] + ' mins' + Fore.RESET)
 
 
 def display_futures_dashboard(client, config):
+    print(client.futures_account_balance(symbol="USDT"))
+    print(client.futures_get_all_orders())
+    '''
+    trailing = client.futures_create_order(
+        symbol="DOGEUSDT",
+        type="TRAILING_STOP_MARKET",
+        callbackRate=1.0,
+        side="SELL",
+        quantity=1000,
+        reduceOnly="true",
+    )
+    print(trailing)
+    '''
+    '''
+    print("buy:")
+    buy = client.futures_create_order(
+        symbol=f"DOGEUSDT",
+        type="MARKET",
+        side="BUY",
+        quantity=500,
+    )
+    print(buy)
+    '''
     '''
     print(client.futures_create_order(symbol='BTCUSDT', type='MARKET', side='BUY', quantity=1))
     import time
@@ -317,7 +344,6 @@ def display_futures_dashboard(client, config):
     print(client.futures_position_information(symbol="BTCUSDT"))
     print(client.futures_get_open_orders(symbol="BTCUSDT"))
     '''
-    print(client.futures_symbol_ticker(symbol="BTCUSDT"))
     config_tradoge = config['tradoge']
     pair_balance = 0
 
@@ -373,7 +399,9 @@ def display_futures_dashboard(client, config):
             config_error(client, config)
     except KeyError as e:
         # TODO FIX probleme affiche deux fois le menu après reconfig
+        # TODO fix exception
         print(e)
+        raise e
         config_error(client, config)
     print('Delay before selling : \n' + Fore.YELLOW + config_tradoge['sell_delay'] + ' mins' + Fore.RESET)
 

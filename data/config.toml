@@ -1,11 +1,22 @@
 [tradoge]
-tweet_frequency = "10"
+tweet_frequency = "3"
 trading_pair = "USDT"
-quantity = "50"
-sell_delay = "5"
+quantity = "100"
+sell_delay = "3"
 buying_mode = "USD"
+market = "Futures"
+spot_trading_pair = "USDT"
+futures_contract_type = "USDⓈ-M"
+futures_trading_pair = "USDT"
+futures_margin_mode = "Isolated"
+futures_leverage = "1"
+futures_trailing_stop = "1"
 
 [binance]
 api_key = ""
 secret_key = ""
 salt = ""
+
+[twitter]
+bearer_token = ""
+ping_url = ""
