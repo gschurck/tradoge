@@ -33,7 +33,7 @@ def get_data():
 
 def save_data(data):
     print(data)
-    with open(file_path, "w") as toml_file:
+    with open(file_path, "w", encoding='utf-8') as toml_file:
         toml.dump(data, toml_file)
     print('Saved data to file')
 
@@ -44,7 +44,7 @@ def save_data_to_tradoge(data):
 
     config['tradoge'].update(data)
     print(data)
-    with open(file_path, "w") as toml_file:
+    with open(file_path, "w", encoding='utf-8') as toml_file:
         toml.dump(config, toml_file)
     print('Saved data to file')
 

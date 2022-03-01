@@ -69,7 +69,6 @@ def restart_on_error(exception, seconds):
 
 def process_new_tweet(client):
     print("Processing new tweet")
-    print(client.futures_symbol_ticker(symbol="BTCUSDT"))
     config_obj = Config()
     config = config_obj.get_toml()
     config_tradoge = config['tradoge']
@@ -126,7 +125,8 @@ def main():
     twitter.configure_stream_filter_rule(tradoge_stream)
 
     print("Waiting for new DOGE tweet from Elon Musk  (CTRL+C to stop)", end="\n\n")
-    twitter.ping_uptime(ping_uptime_url, "/start", None)
+    if ping_uptime_url:
+        twitter.ping_uptime(ping_uptime_url, "/start", None)
 
     while True:
         try:

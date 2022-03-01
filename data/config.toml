@@ -19,4 +19,5 @@ salt = ""
 
 [twitter]
 bearer_token = ""
-ping_url = ""
+ping_uptime_url = ""
+ping_new_tweet_url = ""
