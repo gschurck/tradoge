@@ -273,7 +273,6 @@ def display_spot_dashboard(client, config):
     print('DOGE account average value : \n' + Fore.YELLOW + str(round(doge_value, 2)) + ' $' + Fore.RESET)
     print('')
     print("\033[1m" + '> Current configuration : ' + "\033[0m")
-    print('Tweets update frequency : ' + Fore.YELLOW + config_tradoge['tweet_frequency'] + ' seconds' + Fore.RESET)
     print('Trading pair : ' + Fore.YELLOW + 'DOGE/' + config_tradoge['spot_trading_pair'] + Fore.RESET)
     try:
         if config_tradoge['buying_mode'] == 'USD':
@@ -374,7 +373,6 @@ def display_futures_dashboard(client, config):
     if config_tradoge['futures_trailing_stop']:
         print(f"Trailing stop : {Fore.YELLOW + config_tradoge['futures_trailing_stop']}%{Fore.RESET}")
     print("")
-    print('Tweets update frequency : ' + Fore.YELLOW + config_tradoge['tweet_frequency'] + ' seconds' + Fore.RESET)
     print('Trading pair : ' + Fore.YELLOW + 'DOGE/' + config_tradoge['futures_trading_pair'] + Fore.RESET)
     try:
         if config_tradoge['buying_mode'] == 'USD':
@@ -406,7 +404,7 @@ def display_futures_dashboard(client, config):
         print(e)
         raise e
         config_error(client, config)
-    print('Delay before selling : \n' + Fore.YELLOW + config_tradoge['sell_delay'] + ' mins' + Fore.RESET)
+    #print('Delay before selling : \n' + Fore.YELLOW + config_tradoge['sell_delay'] + ' mins' + Fore.RESET)
 
 
 def open_menu(client, config):

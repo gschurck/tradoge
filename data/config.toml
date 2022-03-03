@@ -1,5 +1,4 @@
 [tradoge]
-tweet_frequency = "3"
 trading_pair = "USDT"
 quantity = "100"
 sell_delay = "3"
