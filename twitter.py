@@ -23,11 +23,14 @@ class TradogeSearchStream(StreamApi):
         self.ping_new_tweet_url = ping_new_tweet_url
 
     def on_tweet(self, tweet):
-        print(Fore.YELLOW + "NEW TWEET" + Fore.RESET)
-        print(tweet)
-        tradoge.process_new_tweet(self.client)
-        if self.ping_new_tweet_url:
-            ping_new_tweet(self.ping_new_tweet_url)
+        if tweet:
+            print(Fore.YELLOW + "NEW TWEET" + Fore.RESET)
+            print(tweet)
+            tradoge.process_new_tweet(self.client)
+            if self.ping_new_tweet_url:
+                ping_new_tweet(self.ping_new_tweet_url)
+        else:
+            print("Empty tweet")
 
     def on_keep_alive(self):
         if self.ping_uptime_url:
