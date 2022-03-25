@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Developed by Guillaume Schurck : https://github.com/gschurck
-# TraDOGE v1.3.3
+# TraDOGE v1.3.4
 
 import subprocess
 import sys
@@ -23,7 +23,6 @@ try:
     from progress.bar import Bar
     from datetime import datetime
     from colorama import init, Fore, Back
-    import threading
     import requests
     import logging
     import twint
@@ -44,18 +43,19 @@ except:
     from progress.bar import Bar
     from datetime import datetime
     from colorama import init, Fore, Back
-    import threading
     import requests
     import logging
 
     try:
         import twint
     except ImportError:
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "--user", "--upgrade", "git+https://github.com/twintproject/twint.git@origin/master#egg=twint"])
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "--user", "--upgrade",
+                               "git+https://github.com/twintproject/twint.git@origin/master#egg=twint"])
         import twint
 
 if twint.__version__ != "2.1.21":
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "--user", "--upgrade", "git+https://github.com/twintproject/twint.git@origin/master#egg=twint"])
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "--user", "--upgrade",
+                           "git+https://github.com/twintproject/twint.git@origin/master#egg=twint"])
     import twint
 
 print("All dependencies are imported")
@@ -171,18 +171,6 @@ def setup(config_obj, client):
         }
     ]
     setup_questions_usd = [
-        {
-            'type': 'input',
-            'name': 'quantity',
-            'message': 'How many dollars do you want to spend on DOGE when Elon tweets about it ? It can be a little less depending on the price but never more. (Enter an integer)',
-        },
-        {
-            'type': 'input',
-            'name': 'sell_delay',
-            'message': 'After how many minutes do you want to sell ? 5min is recommended.',
-        }
-    ]
-    setup_questions_btc = [
         {
             'type': 'input',
             'name': 'quantity',
