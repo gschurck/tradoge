@@ -58,7 +58,7 @@ tradoge.py
 ```bash
 pip install --upgrade -e git+https://github.com/twintproject/twint.git@origin/master#egg=twint
 ```
-**On Raspberry Py, numpy import can cause an error. Try :**
+**On Raspberry Pi, numpy import can cause an error. Try :**
 ```bash
 sudo apt-get install libatlas-base-dev
 ```
