@@ -19,14 +19,14 @@ try:
     import toml
     from art import tprint
     from binance.client import Client
-    from PyInquirer import prompt
     from progress.bar import Bar
     from datetime import datetime
     from colorama import init, Fore, Back
     import requests
     import logging
-    import twint
-
+    from email.utils import parsedate_to_datetime
+    from datetime import datetime
+    import requests
 except:
     print("Downloading missing packages")
     subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
@@ -39,7 +39,6 @@ except:
     import toml
     from art import tprint
     from binance.client import Client
-    from PyInquirer import prompt
     from progress.bar import Bar
     from datetime import datetime
     from colorama import init, Fore, Back
@@ -52,11 +51,6 @@ except:
         subprocess.check_call([sys.executable, "-m", "pip", "install", "--user", "--upgrade",
                                "git+https://github.com/twintproject/twint.git@origin/master#egg=twint"])
         import twint
-
-if twint.__version__ != "2.1.21":
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "--user", "--upgrade",
-                           "git+https://github.com/twintproject/twint.git@origin/master#egg=twint"])
-    import twint
 
 print("All dependencies are imported")
 
@@ -73,6 +67,12 @@ def log_exception(type, value, tb):
 
 sys.excepthook = log_exception
 
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.6997 Safari/537.12",
+    "Authorization": "Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs=1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA",
+    "Referer": "https://twitter.com/search?f=live&lang=en&q=from%3AGiganticRebirth&src=spelling_expansion_revert_click",
+    "Accept-Language": "en-US,en;q=0.5"
+}
 
 # Config class for retrieving Binance credentials from .toml file
 class Config:
@@ -138,6 +138,17 @@ def config_error(config, client):
     print(Fore.RED + 'CONFIG ERROR' + Fore.RESET)
     setup(config, client)
 
+def prompt(questions):
+    data = {}
+    for question in questions:
+        print(question['message'])
+        if 'choices' in question:
+            print('Options: ', question['choices'])
+
+        inputData = input()
+        data[question['name']] = inputData
+
+    return data
 
 def setup(config_obj, client):
     print('Choose your configuration')
@@ -382,6 +393,101 @@ def login(config):
                 sys.exit("You have quit TraDOGE")
     return client
 
+def entryToTweet(entry, obj):
+    entry = entry['content']
+    if 'tweet' in entry['item']['content']:
+        if not entry['item']['content']['tweet']['id'] in obj['globalObjects']['tweets']:
+            return
+
+        if 'promotedMetadata' in entry['item']['content']['tweet']:
+            return
+
+        tweet = obj['globalObjects']['tweets'][entry['item']['content']['tweet']['id']]
+    elif 'tombstone' in entry['item']['content']:
+        if not entry['item']['content']['tombstone']['tweet']['id'] in obj['globalObjects']['tweets']:
+            return
+
+        if not 'tweet' in entry['item']['content']['tombstone']:
+            return
+
+        tweet = obj['globalObjects']['tweets'][entry['item']['content']['tombstone']['tweet']['id']]
+    else:
+        return
+
+    for url in tweet['entities']['urls']:
+        tweet['full_text'] = tweet['full_text'].replace(url['url'], url['expanded_url'])
+
+    mentions = ['@'+i['screen_name'] for i in tweet['entities']['user_mentions']]
+    releasedAt = datetime.timestamp(parsedate_to_datetime(tweet['created_at']))
+    username = obj['globalObjects']['users'][tweet['user_id_str']]['screen_name']
+    content = tweet['full_text'].replace('\n', ' ')
+    for mention in mentions:
+        content = content.replace(mention, '')
+
+    while content.find('  ') != -1:
+        content = content.replace('  ', ' ')
+
+    content = content.strip()
+    url = f"https://twitter.com/{username}/status/{tweet['id_str']}"
+
+    return {
+        'releasedAt': int(releasedAt),
+        'username': username,
+        'content': content,
+        'url': url,
+        'id': tweet['id']
+    }
+
+def getTweets(username):
+    reqParams = {
+        "include_profile_interstitial_type": "1",
+        "include_blocking": "1",
+        "include_blocked_by": "1",
+        "include_followed_by": "1",
+        "include_want_ret1659484323weets": "1",
+        "include_mute_edge": "1",
+        "include_can_dm": "1",
+        "include_can_media_tag": "1",
+        "skip_status": "1",
+        "cards_platform": "Web-12",
+        "include_cards": "1",
+        "include_ext_alt_text": "true",
+        "include_quote_count": "true",
+        "include_reply_count": "1",
+        "tweet_mode": "extended",
+        "include_entities": "true",
+        "include_user_entities": "true",
+        "include_ext_media_color": "true",
+        "include_ext_media_availability": "true",
+        "send_error_codes": "true",
+        "simple_quoted_tweets": "true",
+        "q": f"from:{username}",
+        "tweet_search_mode": "live",
+        "count": "100",
+        "query_source": "spelling_expansion_revert_click",
+        "pc": "1",
+        "spelling_corrections": "1",
+        "ext": "mediaStats,highlightedLabel",
+        "cursor": None
+    }
+
+    page = requests.get('https://api.twitter.com/2/search/adaptive.json', data = reqParams, headers = headers).json()
+
+    tweets = []
+    for instruction in page['timeline']['instructions']:
+        if 'addEntries' in instruction:
+            entries = instruction['addEntries']['entries']
+        elif 'replaceEntry' in instruction:
+            entries = [instruction['replaceEntry']['entry']]
+        else:
+            continue
+
+        for entry in entries:
+            if entry['entryId'].startswith('sq-I-t-') or entry['entryId'].startswith('tweet-'):
+                tweets.append(entryToTweet(entry, page))
+
+    return tweets
+
 
 def encrypt_keys(api_key, secret_key, password):
     password = password.encode()
@@ -461,37 +567,37 @@ def main():
     config = config_obj.get_toml()
 
     # Declarations
-    tweets = []
+    tweets = getTweets('elonmusk')
+    searchFor = ['doge']
 
-    c = twint.Config()
-    c.Username = "elonmusk"
-    c.Search = "doge OR dogecoin"
-    c.Limit = 2
-    c.Store_object = True
-    c.Store_object_tweets_list = tweets
-    c.Hide_output = True
-    c.Filter_retweets = True
-    twint.run.Search(c)
     last_tweet = tweets[0]
-    last_tweet_datetime = datetime.strptime(tweets[0].datetime[:19], '%Y-%m-%d  %H:%M:%S')
+    last_tweet_datetime = last_tweet['releasedAt']
     '''
     w = threading.Thread(target=waiting)
     w.start()
     '''
     while True:
         try:
-            tweets.clear()
-            twint.run.Search(c)
-            tweet_datetime = datetime.strptime(tweets[0].datetime[:19], '%Y-%m-%d  %H:%M:%S')
+            tweets = getTweets('elonmusk')
+            tweet_datetime = datetime.fromtimestamp(tweets[0]['releasedAt'])
         except Exception as e:
             restart_on_error(e, 60)
 
-        if last_tweet.id == tweets[0].id:
-            print(datetime.now().strftime("%H:%M:%S") + " : Waiting for new DOGE tweet from Elon  (CTRL+C to stop)",
+        if last_tweet['id'] == tweets[0]['id']:
+            print(datetime.now().strftime("%Y-%m-%d %H:%M:%S") + " : Waiting for new DOGE tweet from Elon  (CTRL+C to stop)",
                   end="\r")
-        elif tweet_datetime > last_tweet_datetime and '@' not in tweets[0].tweet:
+        elif tweet_datetime > last_tweet_datetime:
             last_tweet = tweets[0]
             last_tweet_datetime = tweet_datetime
+
+            containsDoge = False
+            for query in searchFor:
+                if query in last_tweet['content']:
+                    containsDoge = True
+                    break
+
+            if not containsDoge:
+                continue
 
             if config['tradoge']['buying_mode'] == 'USD':
                 total = doge_buyable_amount(config_obj, client)
