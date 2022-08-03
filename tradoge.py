@@ -561,9 +561,7 @@ def main():
     if config['binance']['secret_key'] and config['binance']['secret_key']:
         client = login(config_obj)
     else:
-        # this client = signup()
-        pass
-
+        client = signup()
     # client = Client(config.api_key, config.secret_key)
     menu(config_obj, client)
     config = config_obj.get_toml()
