@@ -87,6 +87,8 @@ def process_new_tweet(client):
             total = futures_doge_buyable_amount(client=client, config_tradoge=config_tradoge)
             print("Total : " + str(total))
         process_futures(client=client, config=config, total=total)
+        print("Futures processed")
+        print("----------------------------------")
 
 
 def main():
