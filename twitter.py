@@ -11,7 +11,7 @@ import CONSTANTS
 import tradoge
 
 TWITTER_USERNAME = "elonmusk" if not CONSTANTS.testMode else "trouvetonmeme"
-TWITTER_QUERY = f"doge from:{TWITTER_USERNAME} OR dogecoin from:{TWITTER_USERNAME}"
+TWITTER_QUERY = f"from:{TWITTER_USERNAME} -is:reply -is:retweet (doge OR dogecoin)"
 
 
 # TODO remove None
