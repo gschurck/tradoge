@@ -1,4 +1,5 @@
 import os
+import re
 import socket
 import time
 import urllib
@@ -23,14 +24,22 @@ class TradogeSearchStream(StreamApi):
         self.ping_new_tweet_url = ping_new_tweet_url
 
     def on_tweet(self, tweet):
-        if tweet:
-            print(Fore.YELLOW + "NEW TWEET" + Fore.RESET)
-            print(tweet)
-            tradoge.process_new_tweet(self.client)
-            if self.ping_new_tweet_url:
-                ping_new_tweet(self.ping_new_tweet_url)
-        else:
+        print(Fore.YELLOW + "NEW TWEET" + Fore.RESET)
+        print(tweet)
+
+        result = re.search(r'@(?:doge|dogecoin)\w*', tweet.text, re.IGNORECASE)
+        if result:
+            print(result)
+            print(result.group())
+            print("Reply ignored")
+            return
+        elif not tweet:
             print("Empty tweet")
+            return
+        
+        tradoge.process_new_tweet(self.client)
+        if self.ping_new_tweet_url:
+            ping_new_tweet(self.ping_new_tweet_url)
 
     def on_keep_alive(self):
         if self.ping_uptime_url:
