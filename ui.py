@@ -19,7 +19,7 @@ class SlowBar(Bar):
         return self.eta // 1
 
 
-def on_start():
+def display_logo_on_start():
     # Decorations
     print(Fore.YELLOW)
     obj = timg.Renderer()

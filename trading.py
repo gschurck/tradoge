@@ -30,9 +30,9 @@ def update_binance_account_futures_config(client, config_tradoge):
     )
 
 
-def process_spot(client, config, total):
+def process_spot_trades(client, config, total):
     config_tradoge = config["tradoge"]
-    buy = spot_buy(client, config, total)
+    buy_order = place_spot_buy_order(client, config, total)
     price = float(client.get_symbol_ticker(symbol="DOGEUSDT")["price"])
 
     # print(buy)
@@ -65,7 +65,7 @@ def process_spot(client, config, total):
     bar.finish()
 
     reduced_amount = 0
-    spot_sell(
+    place_spot_sell_order(
         client=client,
         config=config,
         sell_total=total,
@@ -74,11 +74,11 @@ def process_spot(client, config, total):
     )
 
 
-def spot_buy(client, config, total):
+def place_spot_buy_order(client, config, total):
     try:
         # Buy order
 
-        buy = client.order_market_buy(
+        buy_order = client.order_market_buy(
             symbol="DOGE" + config["tradoge"]["spot_trading_pair"],
             quantity=total,
         )
@@ -91,14 +91,14 @@ def spot_buy(client, config, total):
             price='0.03'
         )
         """
-        return buy
+        return buy_order
     except Exception as e:
         tradoge.restart_on_error(e, 60)
 
     # time.sleep(int(answers['sell_delay'])*60)
 
 
-def spot_sell(client, config, sell_total, reduced_amount, buy_value):
+def place_spot_sell_order(client, config, sell_total, reduced_amount, buy_value):
     try:
         # Sell order
         sell = client.order_market_sell(
@@ -120,7 +120,7 @@ def spot_sell(client, config, sell_total, reduced_amount, buy_value):
         print("Retrying to sell with 10 DOGE less...")
         reduced_amount += 10
         print("Selling " + str(sell_total - reduced_amount) + " DOGE...")
-        spot_sell(
+        place_spot_sell_order(
             client, config, sell_total - reduced_amount, reduced_amount, buy_value
         )
 
@@ -141,11 +141,11 @@ def spot_sell(client, config, sell_total, reduced_amount, buy_value):
     print(Fore.GREEN + "PROFIT : " + str(round(profit, 2)) + " $" + Fore.RESET + "\n")
 
 
-def process_futures(client, config, total):
+def process_futures_trades(client, config, total):
     print("Processing futures...")
     config_tradoge = config["tradoge"]
-    buy = futures_buy(client, config, total)
-    print(buy)
+    buy_order = place_futures_buy_order(client, config, total)
+    print(buy_order)
     print(Fore.GREEN + "PURCHASE COMPLETED" + Fore.RESET)
     price = float(client.futures_symbol_ticker(symbol="DOGEUSDT")["price"])
     buy_value = price * total
@@ -163,7 +163,7 @@ def process_futures(client, config, total):
     if trailing_stop > 0:
         time.sleep(1)
         print("waiting for trailing stop...")
-        futures_trailing_stop_loss(client, config, total, trailing_stop)
+        place_futures_trailing_stop_loss_order(client, config, total, trailing_stop)
         print("Trailing stop started")
         # TODO for loop to find the position
         print(
@@ -189,10 +189,10 @@ def process_futures(client, config, total):
 
     else:
         wait(config_tradoge, total, config_tradoge["futures_trading_pair"])
-        futures_sell(client, config, total)
+        place_futures_sell_order(client, config, total)
 
 
-def futures_doge_buyable_amount(client, config_tradoge):
+def get_futures_doge_buyable_amount(client, config_tradoge):
     '''
     print("doge buyable amount")
     print(client.futures_symbol_ticker(symbol="DOGEUSDT"))
@@ -204,7 +204,7 @@ def futures_doge_buyable_amount(client, config_tradoge):
     return amount
 
 
-def futures_buy(client, config, total):
+def place_futures_buy_order(client, config, total):
     print("Buying")
     config_tradoge = config["tradoge"]
     update_binance_account_futures_config(client, config_tradoge)
@@ -223,10 +223,10 @@ def futures_buy(client, config, total):
     return buy
 
 
-def futures_sell(client, config, total):
+def place_futures_sell_order(client, config, total):
     config_tradoge = config["tradoge"]
     try:
-        sell = client.futures_create_order(
+        sell_order = client.futures_create_order(
             symbol=f"DOGE{config_tradoge['futures_trading_pair']}",
             type="MARKET",
             side="SELL",
@@ -235,13 +235,13 @@ def futures_sell(client, config, total):
     except Exception as e:
         print(e)
         raise e
-    return sell
+    return sell_order
 
 
-def futures_trailing_stop_loss(client, config, total, callback_rate):
+def place_futures_trailing_stop_loss_order(client, config, total, callback_rate):
     print("Configuring trailing stop loss... callback rate : " + str(callback_rate) + "%")
     config_tradoge = config["tradoge"]
-    trailing = client.futures_create_order(
+    trailing_stop_order = client.futures_create_order(
         symbol="DOGEUSDT",
         type="TRAILING_STOP_MARKET",
         callbackRate=callback_rate,
@@ -249,7 +249,7 @@ def futures_trailing_stop_loss(client, config, total, callback_rate):
         quantity=total,
         reduceOnly="true",
     )
-    return trailing
+    return trailing_stop_order
 
 
 def wait(config_tradoge, total, trading_pair):

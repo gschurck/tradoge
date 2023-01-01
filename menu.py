@@ -51,9 +51,9 @@ def print_last_price(client):
     print('Current DOGE price : \n' + Fore.YELLOW + str(get['price']) + " $" + Fore.RESET)
 
 
-def config_error(client, config):
+def process_config_error(client, config):
     print(Fore.RED + 'CONFIG ERROR' + Fore.RESET)
-    setup(client, config)
+    setup_menu(client, config)
 
 
 def doge_buyable_amount(client, config_tradoge):
@@ -67,7 +67,7 @@ def doge_buyable_amount(client, config_tradoge):
     return amount
 
 
-def setup(client, config):
+def setup_menu(client, config):
     config_tradoge = config['tradoge']
     print('Choose your configuration')
 
@@ -215,7 +215,7 @@ def setup(client, config):
 
         if not (bool(answer_frequency['tweet_frequency']) & bool(answer_trading_pair['spot_trading_pair']) & bool(
                 answers2['quantity']) & bool(answers2['sell_delay'])):
-            config_error(client, config)
+            process_config_error(client, config)
 
     elif answers_market['market'] == 'Futures':  # FUTURES
         answer_trailing = prompt(setup_questions['futures_trailing_stop'])
@@ -297,11 +297,11 @@ def display_spot_dashboard(client, config):
                 print(
                     Fore.YELLOW + config_tradoge['quantity'] + ' DOGE ≃ ' + str(doge_buy_value) + ' $' + Fore.RESET)
         else:
-            config_error(client, config)
+            process_config_error(client, config)
     except KeyError as e:
         print(e)
         # TODO FIX probleme affiche deux fois le menu après reconfig
-        config_error(client, config)
+        process_config_error(client, config)
     print('Delay before selling : \n' + Fore.YELLOW + config_tradoge['sell_delay'] + ' mins' + Fore.RESET)
 
 
@@ -397,19 +397,19 @@ def display_futures_dashboard(client, config):
                 print(
                     Fore.YELLOW + config_tradoge['quantity'] + ' DOGE ≃ ' + str(doge_buy_value) + ' $' + Fore.RESET)
         else:
-            config_error(client, config)
+            process_config_error(client, config)
     except KeyError as e:
         # TODO FIX probleme affiche deux fois le menu après reconfig
         # TODO fix exception
         print(e)
         raise e
-        config_error(client, config)
+        process_config_error(client, config)
     #print('Delay before selling : \n' + Fore.YELLOW + config_tradoge['sell_delay'] + ' mins' + Fore.RESET)
 
 
 def open_menu(client, config):
     config_tradoge = config['tradoge']
-    ui.on_start()
+    ui.display_logo_on_start()
     check_updates()
 
     if config_tradoge['market'] == "Spot":
@@ -429,12 +429,12 @@ def open_menu(client, config):
     ]
     menu_answers = prompt(menu_questions)
     if menu_answers['start'] == 'Change config':
-        setup(client, config)
+        setup_menu(client, config)
     elif menu_answers['start'] == 'Exit':
         sys.exit("You have quit TraDOGE")
 
 
-def signup():
+def launch_signup_menu():
     check_updates()
     print('Welcome in TraDOGE !')
     ask_trading_mode = [
@@ -492,7 +492,7 @@ def signup():
     return Client(api_keys['api_key'], api_keys['secret_key'], testnet=testMode)
 
 
-def login(config):
+def launch_login_menu(config):
     check_updates()
     print('Your Binance API keys are present in config file')
     while True:
@@ -505,7 +505,7 @@ def login(config):
         ]
         password = prompt(ask_password)
         if password['password'] == 'RESET':
-            client = signup()
+            client = launch_signup_menu()
             break
         try:
             api_key, secret_key = data_storage.decrypt_keys(config, password['password'])
@@ -533,7 +533,7 @@ def login(config):
             ]
             retry = prompt(ask_retry)
             if retry['retry'] == 'Setup new API keys':
-                client = signup()
+                client = launch_signup_menu()
             elif retry['retry'] == 'Exit':
                 sys.exit("You have quit TraDOGE")
     return client

@@ -15,7 +15,7 @@ import twitter
 import ui
 import menu
 from CONSTANTS import DOGEUSDT
-from trading import process_spot, process_futures, futures_doge_buyable_amount
+from trading import process_spot_trades, process_futures_trades, get_futures_doge_buyable_amount
 
 # colorama
 if platform.system() == "Linux":
@@ -81,12 +81,12 @@ def process_new_tweet(client):
         else:
             total = int(config["tradoge"]["quantity"])
             print("Total2 : " + str(total))
-        process_spot(client=client, config=config, total=total)
+        process_spot_trades(client=client, config=config, total=total)
     elif config["tradoge"]["market"] == "Futures":
         if config["tradoge"]["buying_mode"] == "USD":
-            total = futures_doge_buyable_amount(client=client, config_tradoge=config_tradoge)
+            total = get_futures_doge_buyable_amount(client=client, config_tradoge=config_tradoge)
             print("Total : " + str(total))
-        process_futures(client=client, config=config, total=total)
+        process_futures_trades(client=client, config=config, total=total)
         print("Futures processed")
         print("----------------------------------")
 
@@ -99,14 +99,14 @@ def main():
     print(tradoge_stream.get_rules().data[0].value)
     print(tradoge_stream.search_stream())
     """
-    ui.on_start()
+    ui.display_logo_on_start()
     # Binance credentials setup
     config_obj = Config()
     config = config_obj.get_toml()
     if config["binance"]["secret_key"] and config["binance"]["secret_key"]:
-        client = menu.login(config_obj)
+        client = menu.launch_login_menu(config_obj)
     else:
-        client = menu.signup()
+        client = menu.launch_signup_menu()
 
     # client = Client(config.api_key, config.secret_key)
     # client.futures_change_margin_type(symbol='DOGEUSDT', marginType='ISOLATED')
