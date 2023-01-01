@@ -49,6 +49,11 @@ def configure_stream_filter_rule(twitter_api_stream):
                 f"ERROR: The stream filter rule can not be correctly configured."
             )
     print("Twitter Stream filter rule is correctly configured.")
+
+    # Manage Twitter stream filter rules queries :
+    # print(tradoge_stream.get_rules())
+    # tradoge_stream.manage_rules(rules={"delete": {"ids": ["1609148813897236483"]}})
+    # print(tradoge_stream.get_rules())
     return True
 
 
