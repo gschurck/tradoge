@@ -2,9 +2,32 @@ package main
 
 import (
 	"fmt"
+	"github.com/spf13/viper"
 	"net/http"
 	"time"
 )
+
+func loadConfig() viperConfig {
+	viper.SetConfigName("config")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath(".")
+	err := viper.ReadInConfig()
+	if err != nil {
+		panic(fmt.Errorf("Fatal error config file: %s \n", err))
+	}
+
+	var config viperConfig
+
+	err = viper.Unmarshal(&config)
+	if err != nil {
+		panic(fmt.Errorf("unable to decode into struct, %w", err))
+	}
+	fmt.Println("unmarshal", config.TwitterAuthToken)
+	for _, exchange := range config.Exchanges {
+		fmt.Println("Exchange:", exchange.Name)
+	}
+	return config
+}
 
 // Function that handles web requests
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -19,6 +42,10 @@ func callAPI() {
 }
 
 func main() {
+	config := loadConfig()
+
+	twitter()
+
 	// Set up the web server in a goroutine
 	go func() {
 		http.HandleFunc("/", handler)
@@ -35,6 +62,8 @@ func main() {
 			callAPI()
 		}
 	}()
+
+	trade(config)
 
 	// Keep the main function alive
 	select {} // This blocks forever unless an interrupt is received
