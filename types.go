@@ -5,7 +5,11 @@ import (
 )
 
 type tradogeConfig struct {
-	TwitterAuthToken string
+	Twitter struct {
+		Username string
+		Password string
+		Email    string
+	}
 	ExchangeAccounts []struct {
 		AccountName    string
 		ExchangeName   string
