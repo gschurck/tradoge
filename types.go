@@ -1,10 +1,14 @@
 package main
 
-type viperConfig struct {
+import (
+	gocryptotraderConfig "github.com/thrasher-corp/gocryptotrader/config"
+)
+
+type tradogeConfig struct {
 	TwitterAuthToken string
-	Exchanges        []struct {
-		Name     string
-		User     string
-		Password string
+	ExchangeAccounts []struct {
+		AccountName    string
+		ExchangeName   string
+		ApiCredentials gocryptotraderConfig.APICredentialsConfig
 	}
 }

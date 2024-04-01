@@ -4,27 +4,29 @@ import (
 	"fmt"
 	"github.com/spf13/viper"
 	"net/http"
+	"os"
 	"time"
 )
 
-func loadConfig() viperConfig {
+func loadConfig() tradogeConfig {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath(".")
+
 	err := viper.ReadInConfig()
 	if err != nil {
 		panic(fmt.Errorf("Fatal error config file: %s \n", err))
 	}
 
-	var config viperConfig
+	var config tradogeConfig
 
 	err = viper.Unmarshal(&config)
 	if err != nil {
 		panic(fmt.Errorf("unable to decode into struct, %w", err))
 	}
-	fmt.Println("unmarshal", config.TwitterAuthToken)
-	for _, exchange := range config.Exchanges {
-		fmt.Println("Exchange:", exchange.Name)
+	//fmt.Println("unmarshal", config.TwitterAuthToken)
+	for _, exchangeAccount := range config.ExchangeAccounts {
+		fmt.Println("Exchange:", exchangeAccount.AccountName)
 	}
 	return config
 }
@@ -42,6 +44,13 @@ func callAPI() {
 }
 
 func main() {
+
+	// Check if the config file exists
+	if _, err := os.Stat("./config.yaml"); os.IsNotExist(err) {
+		fmt.Println("Config file does not exist")
+		return
+	}
+
 	config := loadConfig()
 
 	twitter()
@@ -63,7 +72,7 @@ func main() {
 		}
 	}()
 
-	trade(config)
+	processTrade(config)
 
 	// Keep the main function alive
 	select {} // This blocks forever unless an interrupt is received
