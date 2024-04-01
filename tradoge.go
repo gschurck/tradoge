@@ -53,7 +53,7 @@ func main() {
 
 	config := loadConfig()
 
-	twitter()
+	twitter(config)
 
 	// Set up the web server in a goroutine
 	go func() {
