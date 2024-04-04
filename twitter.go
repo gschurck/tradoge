@@ -39,10 +39,15 @@ func removeUsernamesAtStart(tweet string) string {
 	return re.ReplaceAllString(tweet, "")
 }
 
-func containsIgnoreCase(s, substr string) bool {
+func getMatchingKeyword(s string, substrs []string) string {
 	s = strings.ToLower(s)
-	substr = strings.ToLower(substr)
-	return strings.Contains(s, substr)
+	for _, substr := range substrs {
+		substr = strings.ToLower(substr)
+		if strings.Contains(s, substr) {
+			return substr
+		}
+	}
+	return ""
 }
 
 func loginFromCookies(config tradogeConfig) *twitterscraper.Scraper {
@@ -57,7 +62,7 @@ func loginFromCookies(config tradogeConfig) *twitterscraper.Scraper {
 	return scraper
 }
 
-func twitter(config tradogeConfig) {
+func getLoggedInScrapper(config tradogeConfig) *twitterscraper.Scraper {
 	if _, err := os.Stat("./twitter-cookies.json"); os.IsNotExist(err) {
 		log.Println("Twitter cookies file does not exist")
 		updateTwitterCookies(config)
@@ -69,38 +74,48 @@ func twitter(config tradogeConfig) {
 		scraper = loginFromCookies(config)
 		if !scraper.IsLoggedIn() {
 			fmt.Println("Still not logged in after saving new cookies")
-			return
+			return nil
 		}
 	}
 	fmt.Println("Logged in")
+	return scraper
+}
+
+func searchTweets(scraper *twitterscraper.Scraper, query string, config tradogeConfig, lastTweetFound *twitterscraper.Tweet) {
 	var counter = 0
-	//scraper.SetSearchMode(twitterscraper.SearchLatest)
-	for tweet := range scraper.SearchTweets(context.Background(), "(doge) (from:elonmusk)", 50) {
+
+	for tweet := range scraper.SearchTweets(context.Background(), query, 5) {
 		counter++
 		if tweet.Error != nil {
 			panic(tweet.Error)
 		}
 		fmt.Println(tweet.Text, tweet.TimeParsed, tweet.PermanentURL)
-		if containsIgnoreCase(removeUsernamesAtStart(tweet.Text), "doge") {
-			fmt.Println(tweet.Text, tweet.TimeParsed, tweet.PermanentURL)
-			//fmt.Println("Contains doge")
+		tweetTextOnly := removeUsernamesAtStart(tweet.Text)
+		matchingKeyword := getMatchingKeyword(tweetTextOnly, config.TradingPairs[0].SearchKeywords)
+		if matchingKeyword == "" {
+			//fmt.Println("Tweet does not contain any search keywords")
+			continue
 		}
+		fmt.Println(tweet.Text, tweet.TimeParsed, tweet.PermanentURL)
+		if tweet.TimeParsed.After(lastTweetFound.TimeParsed) && tweet.ID != lastTweetFound.ID {
+			*lastTweetFound = tweet.Tweet
+		}
+
 	}
 	fmt.Println("Total tweets:", counter)
-	/*
-		scraper.SetAuthToken(twitterscraper.AuthToken{Token: token, CSRFToken: "ct0"})
+}
 
-		// After setting Cookies or AuthToken you have to execute IsLoggedIn method.
-		// Without it, scraper wouldn't be able to make requests that requires authentication
-		if !scraper.IsLoggedIn() {
-			panic("Invalid AuthToken")
-		}
-
-		for tweet := range scraper.GetTweets(context.Background(), "x", 50) {
-			if tweet.Error != nil {
-				panic(tweet.Error)
-			}
-			fmt.Println(tweet.Text)
-		}
-	*/
+func twitter(config tradogeConfig) {
+	scraper := getLoggedInScrapper(config)
+	lastTweetFound := new(twitterscraper.Tweet)
+	lastTweetFound = nil
+	fmt.Println("lasttweet =", lastTweetFound)
+	scraper.SetSearchMode(twitterscraper.SearchLatest)
+	keywords := strings.Join(config.TradingPairs[0].SearchKeywords, " OR ")
+	query := fmt.Sprintf("(%s) (from:elonmusk)", keywords)
+	fmt.Println("Query:", query)
+	searchTweets(scraper, query, config, lastTweetFound)
+	if lastTweetFound != nil {
+		fmt.Println("Last tweet found:", lastTweetFound.Text)
+	}
 }
