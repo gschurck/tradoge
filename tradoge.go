@@ -2,16 +2,20 @@ package main
 
 import (
 	"fmt"
+	"github.com/go-playground/validator/v10"
 	"github.com/spf13/viper"
+	"log"
 	"net/http"
 	"os"
 	"time"
 )
 
+var validate *validator.Validate
+
 func loadConfig() tradogeConfig {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
-	viper.AddConfigPath(".")
+	viper.AddConfigPath("./data")
 
 	err := viper.ReadInConfig()
 	if err != nil {
@@ -23,6 +27,11 @@ func loadConfig() tradogeConfig {
 	err = viper.Unmarshal(&config)
 	if err != nil {
 		panic(fmt.Errorf("unable to decode into struct, %w", err))
+	}
+	validate = validator.New(validator.WithRequiredStructEnabled())
+	err = validate.Struct(config)
+	if err != nil {
+		log.Fatalln("Failed to validate config file:", err)
 	}
 	//fmt.Println("unmarshal", config.TwitterAuthToken)
 	for _, exchangeAccount := range config.ExchangeAccounts {
@@ -46,7 +55,7 @@ func callAPI() {
 func main() {
 
 	// Check if the config file exists
-	if _, err := os.Stat("./config.yaml"); os.IsNotExist(err) {
+	if _, err := os.Stat("./data/config.yaml"); os.IsNotExist(err) {
 		fmt.Println("Config file does not exist")
 		return
 	}
@@ -72,7 +81,7 @@ func main() {
 		}
 	}()
 
-	processTrade(config)
+	//processTrade(config)
 
 	// Keep the main function alive
 	select {} // This blocks forever unless an interrupt is received

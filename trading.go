@@ -4,7 +4,7 @@ import (
 	"context"
 )
 
-func processTrade(config tradogeConfig) {
+func processNewTweet(config tradogeConfig) {
 	for _, exchangeAccount := range config.ExchangeAccounts {
 		tradeForExchangeName(config, exchangeAccount.ExchangeName)
 	}
