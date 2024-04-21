@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/gschurck/tradoge/internal/config"
-	"github.com/gschurck/tradoge/internal/twitter"
+	"github.com/gschurck/tradoge/internal/logger"
+	"github.com/gschurck/tradoge/internal/server"
+	"log"
 	"net/http"
 	"os"
 )
@@ -21,16 +22,17 @@ func callAPI() {
 }
 
 func main() {
-
+	logger.SetupLogger()
+	log.Println("test")
 	// Check if the config file exists
 	if _, err := os.Stat("./data/config.yaml"); os.IsNotExist(err) {
-		fmt.Println("Config file does not exist")
+		log.Println("Config file does not exist")
 		return
 	}
 
-	conf := config.LoadConfig()
+	//conf := config.LoadConfig()
 
-	twitter.ProcessNewTweet(conf, "doge")
+	//twitter.ProcessNewTweet(conf, "doge")
 
 	//twitter(config)
 	/*
@@ -54,5 +56,7 @@ func main() {
 	*/
 
 	// Keep the main function alive
-	select {} // This blocks forever unless an interrupt is received
+	//select {} // This blocks forever unless an interrupt is received
+
+	server.StartServer()
 }
