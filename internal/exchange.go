@@ -1,13 +1,14 @@
-package main
+package internal
 
 import (
 	"context"
 	"fmt"
-	"github.com/thrasher-corp/gocryptotrader/config"
+	"github.com/gschurck/tradoge/internal/types"
 	"github.com/thrasher-corp/gocryptotrader/currency"
 	"github.com/thrasher-corp/gocryptotrader/engine"
 	exchange "github.com/thrasher-corp/gocryptotrader/exchanges"
 	"github.com/thrasher-corp/gocryptotrader/exchanges/account"
+	"github.com/thrasher-corp/gocryptotrader/exchanges/margin"
 
 	//account "github.com/thrasher-corp/gocryptotrader/exchanges/account"
 	"github.com/thrasher-corp/gocryptotrader/exchanges/asset"
@@ -34,7 +35,7 @@ func trade(exch exchange.IBotExchange, ctx context.Context) {
 	fmt.Println(resp.OrderID)
 }
 
-func setupExchange(ctx context.Context, name string) exchange.IBotExchange {
+func setupExchange(ctx context.Context, name string, config types.TradogeConfig) exchange.IBotExchange {
 	em := engine.NewExchangeManager()
 	exch, err := em.NewExchangeByName(name)
 	if err != nil {
@@ -43,43 +44,50 @@ func setupExchange(ctx context.Context, name string) exchange.IBotExchange {
 	//var exchCfg *config.Exchange
 
 	//exchCfg, err = cfg.GetExchangeConfig(name)
-	if err != nil {
-		log.Fatalf("Cannot setup %v GetExchangeConfig %v", name, err)
-	}
+	//if err != nil {
+	//	log.Fatalf("Cannot setup %v GetExchangeConfig %v", name, err)
+	//}
 	exch.SetDefaults()
 	exchangeConfig, err := exch.GetDefaultConfig(ctx)
-	exchangeConfig.UseSandbox = true
+	exchangeConfig.UseSandbox = false
 	exchangeConfig.API.AuthenticatedSupport = true
+	/*
+		for k, v := range map[string]string{
+			"RestUSDTMarginedFuturesURL": "https://testnet.binancefuture.com",
+			"RestCoinMarginedFuturesURL": "https://testnet.binancefuture.com",
+			"RestSpotURL":                "https://testnet.binance.vision/api",
+			"RestSpotSupplementaryURL":   "https://testnet.binance.vision/api",
+		} {
+			/*
+				if err := exchangeConfig.API.Endpoints.SetRunning(k.String(), v); err != nil {
+					log.Fatalf("Testnet `%s` URL error with `%s`: %s", k, v, err)
+				}
+			exchangeConfig.API.Endpoints[k] = v
+		}
+	*/
 
-	for k, v := range map[string]string{
-		"RestUSDTMarginedFuturesURL": "https://testnet.binancefuture.com",
-		"RestCoinMarginedFuturesURL": "https://testnet.binancefuture.com",
-		"RestSpotURL":                "https://testnet.binance.vision/api",
-		"RestSpotSupplementaryURL":   "https://testnet.binance.vision/api",
-	} {
-		/*
-			if err := exchangeConfig.API.Endpoints.SetRunning(k.String(), v); err != nil {
-				log.Fatalf("Testnet `%s` URL error with `%s`: %s", k, v, err)
-			}
-		*/
-		exchangeConfig.API.Endpoints[k] = v
-	}
-
-	exchangeConfig.API.Credentials = config.APICredentialsConfig{
-		Key:    "",
-		Secret: "",
-	}
+	exchangeConfig.API.Credentials = config.ExchangeAccount.ApiCredentials
 
 	ctx = account.DeployCredentialsToContext(ctx, &account.Credentials{
-		Key:    "",
-		Secret: "",
+		Key:    config.ExchangeAccount.ApiCredentials.Key,
+		Secret: config.ExchangeAccount.ApiCredentials.Secret,
 	})
 
+	err = exchangeConfig.CurrencyPairs.EnablePair(asset.Margin, currency.NewPair(currency.DOGE, currency.USDT))
+	if err != nil {
+		log.Fatalf("Cannot enable pair %v", err)
+	}
+	pairs, err := exchangeConfig.CurrencyPairs.GetPairs(asset.Margin, true)
+	if err != nil {
+		log.Fatalf("Cannot get pairs %v", err)
+	}
+	fmt.Println("pairs: ", pairs)
 	err = exch.Setup(exchangeConfig)
 	if err != nil {
 		log.Fatalf("Cannot setup %v exchange Setup %v", name, err)
 	}
-
+	enabledAssets := exch.GetAssetTypes(true)
+	fmt.Println("enabled assets: ", enabledAssets)
 	/*
 		err = exch.UpdateTradablePairs(ctx, true)
 		if err != nil && !errors.Is(err, context.DeadlineExceeded) {
@@ -113,14 +121,47 @@ func setupExchange(ctx context.Context, name string) exchange.IBotExchange {
 			log.Fatalf("Cannot validate credentials %v", err)
 		}
 	*/
+	//info, err := exch.FetchAccountInfo(ctx, asset.Margin)
+	//if err != nil {
+	//	log.Fatalf("Cannot fetch account info %v", err)
+	//}
+	//fmt.Println("account info: ", info)
+	err = exch.UpdateTradablePairs(ctx, true)
+	if err != nil {
+		log.Fatalf("Cannot update tradable pairs %v", err)
+	}
+	/*	leverage, err := exch.GetLeverage(ctx, asset.Margin, currency.NewPairWithDelimiter("DOGE", "USDT", "_"), margin.Isolated, order.UnknownSide)
+		if err != nil {
+			log.Fatalf("Cannot get leverage : %v", err)
+		}
+		fmt.Println("leverage: ", leverage)*/
+
+	//exch.SetLeverage(ctx, asset.Margin, currency.NewPair(currency.BTC, currency.USDT), margin.Isolated, 5, order.AnySide)
+	err = exch.UpdateOrderExecutionLimits(ctx, asset.Margin)
+	if err != nil {
+		log.Fatalf("Cannot update order execution limits %v", err)
+	}
+
+	err = exch.CheckOrderExecutionLimits(asset.Margin, currency.NewPairWithDelimiter("DOGE", "USDT", "-"), 0.001, 5, order.Market)
+	if err != nil {
+		log.Fatalf("Cannot check order execution limits %v", err)
+	}
+
+	limits, err := exch.GetOrderExecutionLimits(asset.Margin, currency.NewPair(currency.DOGE, currency.USDT))
+	if err != nil {
+		log.Fatalf("Cannot get order execution limits %v", err)
+	}
+	fmt.Println("limits: ", limits)
+	fmt.Printf("%+v\n", limits)
 	o := &order.Submit{
-		Exchange:  exch.GetName(), // or method GetName() if exchange.IBotInterface
-		Pair:      currency.NewPair(currency.BTC, currency.USD),
-		Side:      order.Buy,
-		Type:      order.Limit,
-		Price:     1000000,
-		Amount:    0.1,
-		AssetType: asset.Spot,
+		Exchange: exch.GetName(), // or method GetName() if exchange.IBotInterface
+		Pair:     currency.NewPair(currency.DOGE, currency.USDT),
+		Side:     order.Buy,
+		Type:     order.TrailingStop,
+		//Price:      0.19,
+		Amount:     27,
+		AssetType:  asset.Margin,
+		MarginType: margin.Isolated,
 	}
 	resp, err := exch.SubmitOrder(ctx, o)
 	if err != nil {
