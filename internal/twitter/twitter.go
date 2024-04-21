@@ -1,9 +1,11 @@
-package main
+package twitter
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/gschurck/tradoge/internal/trading"
+	"github.com/gschurck/tradoge/internal/types"
 	twitterscraper "github.com/imperatrona/twitter-scraper"
 	"log"
 	"net/http"
@@ -12,7 +14,7 @@ import (
 	"strings"
 )
 
-func updateTwitterCookies(config tradogeConfig) {
+func updateTwitterCookies(config types.TradogeConfig) {
 	scraper := twitterscraper.New()
 	err := scraper.Login(config.Twitter.Username, config.Twitter.Password)
 	if err != nil {
@@ -50,7 +52,7 @@ func getMatchingKeyword(s string, substrs []string) string {
 	return ""
 }
 
-func loginFromCookies(config tradogeConfig) *twitterscraper.Scraper {
+func loginFromCookies(config types.TradogeConfig) *twitterscraper.Scraper {
 	scraper := twitterscraper.New()
 	f, _ := os.Open("twitter-cookies.json")
 	var cookies []*http.Cookie
@@ -62,7 +64,7 @@ func loginFromCookies(config tradogeConfig) *twitterscraper.Scraper {
 	return scraper
 }
 
-func getLoggedInScrapper(config tradogeConfig) *twitterscraper.Scraper {
+func getLoggedInScrapper(config types.TradogeConfig) *twitterscraper.Scraper {
 	if _, err := os.Stat("./twitter-cookies.json"); os.IsNotExist(err) {
 		log.Println("Twitter cookies file does not exist")
 		updateTwitterCookies(config)
@@ -81,7 +83,7 @@ func getLoggedInScrapper(config tradogeConfig) *twitterscraper.Scraper {
 	return scraper
 }
 
-func searchTweets(scraper *twitterscraper.Scraper, query string, config tradogeConfig, lastTweetFound *twitterscraper.Tweet) {
+func searchTweets(scraper *twitterscraper.Scraper, query string, config types.TradogeConfig, lastTweetFound *twitterscraper.Tweet) {
 	var counter = 0
 
 	for tweet := range scraper.SearchTweets(context.Background(), query, 5) {
@@ -105,7 +107,7 @@ func searchTweets(scraper *twitterscraper.Scraper, query string, config tradogeC
 	fmt.Println("Total tweets:", counter)
 }
 
-func twitter(config tradogeConfig) {
+func twitter(config types.TradogeConfig) {
 	scraper := getLoggedInScrapper(config)
 	lastTweetFound := new(twitterscraper.Tweet)
 	lastTweetFound = nil
@@ -117,5 +119,17 @@ func twitter(config tradogeConfig) {
 	searchTweets(scraper, query, config, lastTweetFound)
 	if lastTweetFound != nil {
 		fmt.Println("Last tweet found:", lastTweetFound.Text)
+	}
+}
+
+func ProcessNewTweet(config types.TradogeConfig, matchingKeyword string) {
+	for _, tradingPair := range config.TradingPairs {
+		for _, keyword := range tradingPair.SearchKeywords {
+			if keyword == matchingKeyword {
+				trading.TradeForExchangeName(config, config.ExchangeAccount.ExchangeName, tradingPair)
+				fmt.Println("Trade", tradingPair.BaseCurrency, tradingPair.QuoteCurrency)
+				break
+			}
+		}
 	}
 }
