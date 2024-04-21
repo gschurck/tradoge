@@ -1,2 +1,2 @@
-data/config.yaml
-data/twitter-cookies.json
+data/*
+!data/config.example.yaml
