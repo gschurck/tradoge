@@ -10,7 +10,7 @@ Donate :
 
 # :chart_with_upwards_trend: TraDOGE
 
-## ⚠️ TraDOGE is currently broken due to changes on Twitter. Stay tuned for the next update.
+<!-- ## ⚠️ TraDOGE is currently broken due to changes on Twitter. Stay tuned for the next update. -->
 
 Tradoge is a Binance trading bot that instantly buys and sells DOGE cryptocurrency on Binance when Elon Musk tweets about it.
 
