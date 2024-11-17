@@ -26,16 +26,19 @@ func TradeBinanceMargin(config types.TradogeConfig, pair types.TradingPair) {
 	quoteOrderQty := preBuyQuoteAssetQuantity * leverage
 	log.Println("quoteOrderQty", quoteOrderQty)
 	quoteOrderQtyStr := fmt.Sprintf("%f", quoteOrderQty)
+	log.Println("Symbol", symbol)
 
 	buyOrder, err := client.NewCreateMarginOrderService().IsIsolated(true).Symbol(symbol).
 		Side(binance.SideTypeBuy).Type(binance.OrderTypeMarket).SideEffectType(binance.SideEffectTypeMarginBuy).
 		QuoteOrderQty(quoteOrderQtyStr).Do(context.Background())
 	if err != nil {
-		log.Fatal("Cannot buy", err)
+		log.Fatal("Cannot buy : ", err)
 	}
 	log.Println(buyOrder)
 	log.Printf("Bought for %s %s of %s\n", quoteOrderQtyStr, pair.QuoteCurrency, pair.BaseCurrency)
+
 	time.Sleep(1 * time.Minute)
+
 	log.Println("Selling")
 	refreshedBuyOrder, err := client.NewGetMarginOrderService().IsIsolated(true).Symbol(symbol).
 		OrderID(buyOrder.OrderID).Do(context.Background())
