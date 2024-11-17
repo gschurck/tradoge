@@ -1,2 +1,3 @@
 data/*
 !data/config.example.yaml
+.idea

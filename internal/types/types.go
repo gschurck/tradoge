@@ -7,9 +7,7 @@ import (
 type TradogeConfig struct {
 	Version string `validate:"required"`
 	Twitter struct {
-		Username string `validate:"required"`
-		Password string `validate:"required"`
-		Email    string
+		AuthToken AuthToken `validate:"required"`
 	} `validate:"required"`
 	ExchangeAccount struct {
 		AccountName    string                      `validate:"required"`
@@ -24,4 +22,9 @@ type TradingPair struct {
 	QuoteCurrency       string   `validate:"required,min=2"`
 	ExchangeAccountName string   `validate:"required"`
 	SearchKeywords      []string `validate:"required,min=1,unique,dive,min=2"`
+}
+
+type AuthToken struct {
+	Token     string `validate:"required"`
+	CSRFToken string `validate:"required"`
 }

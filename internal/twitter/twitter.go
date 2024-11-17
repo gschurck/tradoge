@@ -16,15 +16,20 @@ import (
 
 func updateTwitterCookies(config types.TradogeConfig) {
 	scraper := twitterscraper.New()
-	err := scraper.Login(config.Twitter.Username, config.Twitter.Password)
-	if err != nil {
-		panic(err)
-	}
+	fmt.Println("Logging in to Twitter...")
+	fmt.Println("Token:", config.Twitter.AuthToken.Token)
+	fmt.Println("CSRFToken:", config.Twitter.AuthToken.CSRFToken)
+	scraper.SetAuthToken(
+		twitterscraper.AuthToken{
+			Token:     config.Twitter.AuthToken.Token,
+			CSRFToken: config.Twitter.AuthToken.CSRFToken,
+		})
+
 	cookies := scraper.GetCookies()
 	data, _ := json.Marshal(cookies)
 	var f *os.File
 	f, _ = os.Create("twitter-cookies.json")
-	_, err = f.Write(data)
+	_, err := f.Write(data)
 	if err != nil {
 		log.Fatalln("Failed to write Twitter cookies file:", err)
 	}
@@ -76,7 +81,7 @@ func getLoggedInScrapper(config types.TradogeConfig) *twitterscraper.Scraper {
 		scraper = loginFromCookies(config)
 		if !scraper.IsLoggedIn() {
 			fmt.Println("Still not logged in after saving new cookies")
-			return nil
+			panic("Failed to log in to Twitter")
 		}
 	}
 	fmt.Println("Logged in")
@@ -91,23 +96,23 @@ func searchTweets(scraper *twitterscraper.Scraper, query string, config types.Tr
 		if tweet.Error != nil {
 			panic(tweet.Error)
 		}
-		fmt.Println(tweet.Text, tweet.TimeParsed, tweet.PermanentURL)
 		tweetTextOnly := removeUsernamesAtStart(tweet.Text)
 		matchingKeyword := getMatchingKeyword(tweetTextOnly, config.TradingPairs[0].SearchKeywords)
+		// double check if the tweet contains a keyword
 		if matchingKeyword == "" {
-			//fmt.Println("Tweet does not contain any search keywords")
+			fmt.Println("Tweet does not contain any search keywords")
 			continue
 		}
-		fmt.Println(tweet.Text, tweet.TimeParsed, tweet.PermanentURL)
-		if tweet.TimeParsed.After(lastTweetFound.TimeParsed) && tweet.ID != lastTweetFound.ID {
-			*lastTweetFound = tweet.Tweet
-		}
+		fmt.Println(tweet.Text, tweet.TimeParsed, tweet.PermanentURL, tweet.ID)
+		//if tweet.TimeParsed.After(lastTweetFound.TimeParsed) && tweet.ID != lastTweetFound.ID {
+		//	*lastTweetFound = tweet.Tweet
+		//}
 
 	}
 	fmt.Println("Total tweets:", counter)
 }
 
-func twitter(config types.TradogeConfig) {
+func Twitter(config types.TradogeConfig) {
 	scraper := getLoggedInScrapper(config)
 	lastTweetFound := new(twitterscraper.Tweet)
 	lastTweetFound = nil

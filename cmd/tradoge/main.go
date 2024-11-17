@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"github.com/gschurck/tradoge/internal/config"
 	"github.com/gschurck/tradoge/internal/logger"
 	"github.com/gschurck/tradoge/internal/server"
+	"github.com/gschurck/tradoge/internal/twitter"
 	"log"
 	"net/http"
 	"os"
@@ -30,11 +32,11 @@ func main() {
 		return
 	}
 
-	//conf := config.LoadConfig()
+	conf := config.LoadConfig()
 
 	//twitter.ProcessNewTweet(conf, "doge")
 
-	//twitter(config)
+	twitter.Twitter(conf)
 	/*
 		// Set up the web server in a goroutine
 		go func() {
