@@ -7,29 +7,38 @@ import (
 	"github.com/gschurck/tradoge/internal/types"
 	"github.com/gschurck/tradoge/internal/utils"
 	"log"
+	"sync"
 )
 
-/*func getExchangeById(exchangeId string) exchange.IBotExchange {
-	if exchangeId != "binance" {
-		return nil
-	}
-	emptyExchange := new(exchange.IBotExchange)
-	// use func setupExchange from exchange_wrapper_standards_test.go
-	return new(binance.Binance)
-}*/
+type Trader struct {
+	isTrading sync.Mutex
+}
 
-func TradeForExchangeName(config types.TradogeConfig, exchangeId string, pair types.TradingPair) {
+func NewTrader() *Trader {
+	return &Trader{}
+}
+
+func (t *Trader) TradeForExchangeName(config types.TradogeConfig, exchangeId string, pair types.TradingPair) error {
 	if exchangeId != "binance-margin" {
 		log.Fatalf("Exchange %s is not supported", exchangeId)
 	}
-	/*
-		ctx := context.Background()
-			exchangeInstance := setupExchange(ctx, exchangeId, config)
-			if exchangeInstance == nil {
-				return
+
+	return t.TradeBinanceMargin(config, pair)
+}
+
+func (t *Trader) ProcessNewTweet(config types.TradogeConfig, matchingKeyword string) {
+	for _, tradingPair := range config.TradingPairs {
+		for _, keyword := range tradingPair.SearchKeywords {
+			if keyword == matchingKeyword {
+				err := t.TradeForExchangeName(config, config.ExchangeAccount.ExchangeName, tradingPair)
+				if err != nil {
+					log.Println(err)
+				}
+				fmt.Println("Trade", tradingPair.BaseCurrency, tradingPair.QuoteCurrency)
+				break
 			}
-	*/
-	TradeBinanceMargin(config, pair)
+		}
+	}
 }
 
 func GetStepInfo(client *binance.Client, symbol string) float64 {

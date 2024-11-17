@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/gschurck/tradoge/internal/trading"
 	"github.com/gschurck/tradoge/internal/types"
 	twitterscraper "github.com/imperatrona/twitter-scraper"
 	"log"
@@ -124,17 +123,5 @@ func Twitter(config types.TradogeConfig) {
 	searchTweets(scraper, query, config, lastTweetFound)
 	if lastTweetFound != nil {
 		fmt.Println("Last tweet found:", lastTweetFound.Text)
-	}
-}
-
-func ProcessNewTweet(config types.TradogeConfig, matchingKeyword string) {
-	for _, tradingPair := range config.TradingPairs {
-		for _, keyword := range tradingPair.SearchKeywords {
-			if keyword == matchingKeyword {
-				trading.TradeForExchangeName(config, config.ExchangeAccount.ExchangeName, tradingPair)
-				fmt.Println("Trade", tradingPair.BaseCurrency, tradingPair.QuoteCurrency)
-				break
-			}
-		}
 	}
 }

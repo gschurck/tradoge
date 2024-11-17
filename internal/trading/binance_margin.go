@@ -12,7 +12,12 @@ import (
 	"time"
 )
 
-func TradeBinanceMargin(config types.TradogeConfig, pair types.TradingPair) {
+func (t *Trader) TradeBinanceMargin(config types.TradogeConfig, pair types.TradingPair) error {
+	if !t.isTrading.TryLock() {
+		return fmt.Errorf("trade rejected: another trade is currently processing")
+	}
+	defer t.isTrading.Unlock()
+
 	symbol := strings.ToUpper(pair.BaseCurrency + pair.QuoteCurrency)
 	//binance.UseTestnet = true
 	client := binance.NewClient(config.ExchangeAccount.ApiCredentials.Key, config.ExchangeAccount.ApiCredentials.Secret)
@@ -90,4 +95,6 @@ func TradeBinanceMargin(config types.TradogeConfig, pair types.TradingPair) {
 	profit := refreshedQuoteAssetQuantity - preBuyQuoteAssetQuantity
 	log.Printf("Profit: %f %s\n", profit, pair.QuoteCurrency)
 	log.Printf("Base Asset Quantity still in account: %f %s\n", refreshedBaseAssetQuantity, pair.BaseCurrency)
+
+	return err
 }

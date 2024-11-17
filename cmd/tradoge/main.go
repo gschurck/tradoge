@@ -34,7 +34,8 @@ func main() {
 
 	conf := config.LoadConfig()
 
-	//twitter.ProcessNewTweet(conf, "doge")
+	//trader := trading.NewTrader()
+	//trader.ProcessNewTweet(conf, "doge")
 
 	twitter.Twitter(conf)
 	/*
