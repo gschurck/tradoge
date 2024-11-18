@@ -31,7 +31,7 @@ func LoadConfig() types.TradogeConfig {
 	if err != nil {
 		log.Fatalln("Failed to validate config file:", err)
 	}
-	//fmt.Println("unmarshal", config.TwitterAuthToken)
+	log.Println("Config file loaded successfully")
 	//for _, exchangeAccount := range config.ExchangeAccounts {
 	//	fmt.Println("Exchange:", exchangeAccount.AccountName)
 	//}

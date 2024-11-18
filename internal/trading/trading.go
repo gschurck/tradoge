@@ -2,7 +2,6 @@ package trading
 
 import (
 	"context"
-	"fmt"
 	"github.com/adshao/go-binance/v2"
 	"github.com/gschurck/tradoge/internal/types"
 	"github.com/gschurck/tradoge/internal/utils"
@@ -34,7 +33,7 @@ func (t *Trader) ProcessNewTweet(config types.TradogeConfig, matchingKeyword str
 				if err != nil {
 					log.Println(err)
 				}
-				fmt.Println("Trade", tradingPair.BaseCurrency, tradingPair.QuoteCurrency)
+				log.Println("Trade", tradingPair.BaseCurrency, tradingPair.QuoteCurrency)
 				break
 			}
 		}
@@ -51,8 +50,8 @@ func GetStepInfo(client *binance.Client, symbol string) float64 {
 		if symbolInfo.Symbol == symbol {
 			for _, filter := range symbolInfo.Filters {
 				if filter["filterType"] == "LOT_SIZE" {
-					fmt.Println("found step size")
-					fmt.Println(filter["stepSize"])
+					log.Println("found step size")
+					log.Println(filter["stepSize"])
 					stepSize, ok := filter["stepSize"].(string)
 					if !ok {
 						log.Fatal("stepSize is not of type string")

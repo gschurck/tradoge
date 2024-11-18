@@ -25,7 +25,6 @@ func callAPI() {
 
 func main() {
 	logger.SetupLogger()
-	log.Println("test")
 	// Check if the config file exists
 	if _, err := os.Stat("./data/config.yaml"); os.IsNotExist(err) {
 		log.Println("Config file does not exist")
