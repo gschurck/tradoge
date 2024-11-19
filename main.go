@@ -36,7 +36,7 @@ func main() {
 	//trader := trading.NewTrader()
 	//trader.ProcessNewTweet(conf, "doge")
 
-	twitter.Twitter(conf)
+	twitter.MonitorTweets(conf)
 	/*
 		// Set up the web server in a goroutine
 		go func() {

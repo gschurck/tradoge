@@ -11,6 +11,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"time"
 )
 
 func updateTwitterCookies(config types.TradogeConfig) {
@@ -87,10 +88,10 @@ func getLoggedInScrapper(config types.TradogeConfig) *twitterscraper.Scraper {
 	return scraper
 }
 
-func searchTweets(scraper *twitterscraper.Scraper, query string, config types.TradogeConfig, lastTweetFound *twitterscraper.Tweet) {
+func searchTweets(scraper *twitterscraper.Scraper, query string, config types.TradogeConfig) {
 	var counter = 0
 
-	for tweet := range scraper.SearchTweets(context.Background(), query, 5) {
+	for tweet := range scraper.SearchTweets(context.Background(), query, 10) {
 		counter++
 		if tweet.Error != nil {
 			panic(tweet.Error)
@@ -98,30 +99,46 @@ func searchTweets(scraper *twitterscraper.Scraper, query string, config types.Tr
 		tweetTextOnly := removeUsernamesAtStart(tweet.Text)
 		matchingKeyword := getMatchingKeyword(tweetTextOnly, config.TradingPairs[0].SearchKeywords)
 		// double check if the tweet contains a keyword
+		log.Println(tweet.Text, tweet.TimeParsed, tweet.PermanentURL, tweet.ID)
 		if matchingKeyword == "" {
 			log.Println("Tweet does not contain any search keywords")
 			continue
 		}
-		log.Println(tweet.Text, tweet.TimeParsed, tweet.PermanentURL, tweet.ID)
-		//if tweet.TimeParsed.After(lastTweetFound.TimeParsed) && tweet.ID != lastTweetFound.ID {
-		//	*lastTweetFound = tweet.Tweet
-		//}
 
 	}
 	log.Println("Total tweets:", counter)
 }
 
-func Twitter(config types.TradogeConfig) {
+func getLastTweet(scraper *twitterscraper.Scraper, query string) *twitterscraper.Tweet {
+	tweets := scraper.SearchTweets(context.Background(), query, 1)
+	for tweet := range tweets {
+		if tweet.Error != nil {
+			panic(tweet.Error)
+		}
+		return &tweet.Tweet
+	}
+	panic("Failed to get last tweet")
+}
+
+func MonitorTweets(config types.TradogeConfig) {
 	scraper := getLoggedInScrapper(config)
-	lastTweetFound := new(twitterscraper.Tweet)
-	lastTweetFound = nil
-	log.Println("lasttweet =", lastTweetFound)
+	scraper.WithDelay(5)
+
 	scraper.SetSearchMode(twitterscraper.SearchLatest)
 	keywords := strings.Join(config.TradingPairs[0].SearchKeywords, " OR ")
 	query := fmt.Sprintf("(%s) (from:elonmusk)", keywords)
+	if !config.TradingPairs[0].IncludeReplies {
+		query += " -filter:replies"
+	}
 	log.Println("Query:", query)
-	searchTweets(scraper, query, config, lastTweetFound)
-	if lastTweetFound != nil {
-		log.Println("Last tweet found:", lastTweetFound.Text)
+
+	lastTweet := getLastTweet(scraper, query)
+	for {
+		time.Sleep(10 * time.Second)
+		log.Println("Checking for new tweets...")
+		newLastTweet := getLastTweet(scraper, query)
+		if newLastTweet.TimeParsed.After(lastTweet.TimeParsed) && newLastTweet.ID != lastTweet.ID {
+			log.Println("New tweet found")
+		}
 	}
 }

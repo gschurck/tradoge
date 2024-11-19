@@ -22,6 +22,7 @@ type TradingPair struct {
 	QuoteCurrency       string   `validate:"required,min=2"`
 	ExchangeAccountName string   `validate:"required"`
 	SearchKeywords      []string `validate:"required,min=1,unique,dive,min=2"`
+	IncludeReplies      bool
 }
 
 type AuthToken struct {
