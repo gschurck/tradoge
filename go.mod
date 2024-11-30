@@ -5,7 +5,7 @@ go 1.23.2
 require (
 	github.com/adshao/go-binance/v2 v2.6.1
 	github.com/go-playground/validator/v10 v10.23.0
-	github.com/imperatrona/twitter-scraper v0.0.14
+	github.com/imperatrona/twitter-scraper v0.0.15
 	github.com/spf13/viper v1.19.0
 	github.com/thrasher-corp/gocryptotrader v0.0.0-20241113043208-85ecd0d4b848
 )
