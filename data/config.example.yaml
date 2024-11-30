@@ -1,0 +1,23 @@
+version: 0.1
+twitter:
+  # These tokens can be found in the cookies of your browser :
+  # F12 or right click -> Inspect
+  # On Chrome browsers: Application -> Cookies -> https://x.com
+  # On Firefox: Storage -> Cookies -> https://x.com
+  tokens:
+    authToken: your_twitter_auth_token_in_cookies
+    ct0: your_twitter_ct0_token_in_cookies
+exchangeAccount:
+  accountName: binance
+  exchangeName: binance-margin
+  apiCredentials:
+    key: your_API_key
+    secret: your_secret_key
+tradingPairs:
+  - baseCurrency: DOGE
+    quoteCurrency: USDT
+    exchangeAccountName: binance
+    searchKeywords:
+      - doge
+      - dogecoin
+    includeReplies: false
