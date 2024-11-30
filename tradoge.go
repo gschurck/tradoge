@@ -16,13 +16,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello, World!")
 }
 
-// Function that calls the API
-func callAPI() {
-	// Dummy function to represent API calling
-	fmt.Println("Calling API...")
-	// Add your API calling code here
-}
-
 func main() {
 	logger.SetupLogger()
 	// Check if the config file exists
