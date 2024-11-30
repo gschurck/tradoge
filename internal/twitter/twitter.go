@@ -131,11 +131,12 @@ func MonitorTweets(config types.TradogeConfig) {
 		query += " -filter:replies"
 	}
 	log.Println("Query:", query)
+	log.Println("Start to search for new tweets every 10 seconds...")
 
 	lastTweet := getLastTweet(scraper, query)
 	for {
 		time.Sleep(10 * time.Second)
-		log.Println("Checking for new tweets...")
+		//log.Println("Checking for new tweets...")
 		newLastTweet := getLastTweet(scraper, query)
 		if newLastTweet.TimeParsed.After(lastTweet.TimeParsed) && newLastTweet.ID != lastTweet.ID {
 			log.Println("New tweet found")
