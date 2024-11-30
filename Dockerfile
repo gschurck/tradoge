@@ -22,8 +22,6 @@ WORKDIR /app
 # Copy the binary from builder
 COPY --from=builder /app/main .
 
-# Add ca-certificates for HTTPS
-RUN apk --no-cache add ca-certificates
 
 # Set the binary as the entrypoint
 ENTRYPOINT ["/app/main"]
