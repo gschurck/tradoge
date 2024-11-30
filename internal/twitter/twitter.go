@@ -17,12 +17,12 @@ import (
 func updateTwitterCookies(config types.TradogeConfig) {
 	scraper := twitterscraper.New()
 	log.Println("Logging in to Twitter...")
-	log.Println("Token:", config.Twitter.AuthToken.Token)
-	log.Println("CSRFToken:", config.Twitter.AuthToken.CSRFToken)
+	log.Println("AuthToken:", config.Twitter.Tokens.AuthToken)
+	log.Println("CT0:", config.Twitter.Tokens.CT0)
 	scraper.SetAuthToken(
 		twitterscraper.AuthToken{
-			Token:     config.Twitter.AuthToken.Token,
-			CSRFToken: config.Twitter.AuthToken.CSRFToken,
+			Token:     config.Twitter.Tokens.AuthToken,
+			CSRFToken: config.Twitter.Tokens.CT0,
 		})
 
 	cookies := scraper.GetCookies()
