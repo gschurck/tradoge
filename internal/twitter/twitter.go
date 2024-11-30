@@ -28,7 +28,7 @@ func updateTwitterCookies(config types.TradogeConfig) {
 	cookies := scraper.GetCookies()
 	data, _ := json.Marshal(cookies)
 	var f *os.File
-	f, _ = os.Create("twitter-cookies.json")
+	f, _ = os.Create("data/twitter-cookies.json")
 	_, err := f.Write(data)
 	if err != nil {
 		log.Fatalln("Failed to write Twitter cookies file:", err)
@@ -59,7 +59,7 @@ func getMatchingKeyword(s string, substrs []string) string {
 
 func loginFromCookies(config types.TradogeConfig) *twitterscraper.Scraper {
 	scraper := twitterscraper.New()
-	f, _ := os.Open("twitter-cookies.json")
+	f, _ := os.Open("data/twitter-cookies.json")
 	var cookies []*http.Cookie
 	err := json.NewDecoder(f).Decode(&cookies)
 	if err != nil {
@@ -70,7 +70,7 @@ func loginFromCookies(config types.TradogeConfig) *twitterscraper.Scraper {
 }
 
 func getLoggedInScrapper(config types.TradogeConfig) *twitterscraper.Scraper {
-	if _, err := os.Stat("./twitter-cookies.json"); os.IsNotExist(err) {
+	if _, err := os.Stat("./data/twitter-cookies.json"); os.IsNotExist(err) {
 		log.Println("Twitter cookies file does not exist")
 		updateTwitterCookies(config)
 	}
