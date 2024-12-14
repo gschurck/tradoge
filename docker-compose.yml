@@ -4,6 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
     volumes:
+      - ./config:/app/config:ro
       - ./data:/app/data
     restart: unless-stopped
     deploy:

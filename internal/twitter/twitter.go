@@ -17,8 +17,8 @@ import (
 func updateTwitterCookies(config types.TradogeConfig) {
 	scraper := twitterscraper.New()
 	log.Println("Logging in to Twitter...")
-	log.Println("AuthToken:", config.Twitter.Tokens.AuthToken)
-	log.Println("CT0:", config.Twitter.Tokens.CT0)
+	//log.Println("AuthToken:", config.Twitter.Tokens.AuthToken)
+	//log.Println("CT0:", config.Twitter.Tokens.CT0)
 	scraper.SetAuthToken(
 		twitterscraper.AuthToken{
 			Token:     config.Twitter.Tokens.AuthToken,

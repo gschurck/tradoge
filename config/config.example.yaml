@@ -15,7 +15,7 @@ exchangeAccount:
     secret: your_secret_key
 tradingPairs:
   - baseCurrency: DOGE
-    quoteCurrency: USDT
+    quoteCurrency: USDC
     exchangeAccountName: binance
     searchKeywords:
       - doge

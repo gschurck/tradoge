@@ -1,3 +1,4 @@
 data/*
-!data/config.example.yaml
+config/*
+!config/config.example.yaml
 .idea

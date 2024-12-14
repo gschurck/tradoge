@@ -19,7 +19,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	logger.SetupLogger()
 	// Check if the config file exists
-	if _, err := os.Stat("./data/config.yaml"); os.IsNotExist(err) {
+	if _, err := os.Stat("./config/config.yaml"); os.IsNotExist(err) {
 		log.Println("Config file does not exist")
 		return
 	}

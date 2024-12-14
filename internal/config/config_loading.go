@@ -13,7 +13,7 @@ var validate *validator.Validate
 func LoadConfig() types.TradogeConfig {
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
-	viper.AddConfigPath("./data")
+	viper.AddConfigPath("./config")
 
 	err := viper.ReadInConfig()
 	if err != nil {
