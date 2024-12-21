@@ -3,6 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    user: "${UID:-1000}:${GID:-1000}"
     volumes:
       - ./config:/app/config:ro
       - ./data:/app/data
