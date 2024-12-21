@@ -11,7 +11,6 @@ import (
 	"os"
 	"regexp"
 	"strings"
-	"time"
 )
 
 func updateTwitterCookies(config types.TradogeConfig) {
@@ -57,7 +56,7 @@ func getMatchingKeyword(s string, substrs []string) string {
 	return ""
 }
 
-func loginFromCookies(config types.TradogeConfig) *twitterscraper.Scraper {
+func loginFromCookies() *twitterscraper.Scraper {
 	scraper := twitterscraper.New()
 	f, _ := os.Open("data/twitter-cookies.json")
 	var cookies []*http.Cookie
@@ -74,11 +73,11 @@ func getLoggedInScrapper(config types.TradogeConfig) *twitterscraper.Scraper {
 		log.Println("Twitter cookies file does not exist")
 		updateTwitterCookies(config)
 	}
-	scraper := loginFromCookies(config)
+	scraper := loginFromCookies()
 	if !scraper.IsLoggedIn() {
 		log.Println("Not logged in")
 		updateTwitterCookies(config)
-		scraper = loginFromCookies(config)
+		scraper = loginFromCookies()
 		if !scraper.IsLoggedIn() {
 			log.Println("Still not logged in after saving new cookies")
 			panic("Failed to log in to Twitter")
@@ -113,7 +112,7 @@ func getLastTweet(scraper *twitterscraper.Scraper, query string) *twitterscraper
 	tweets := scraper.SearchTweets(context.Background(), query, 1)
 	for tweet := range tweets {
 		if tweet.Error != nil {
-			panic(tweet.Error)
+			panic("Failed to get last tweet :" + tweet.Error.Error())
 		}
 		return &tweet.Tweet
 	}
@@ -122,7 +121,8 @@ func getLastTweet(scraper *twitterscraper.Scraper, query string) *twitterscraper
 
 func MonitorTweets(config types.TradogeConfig) {
 	scraper := getLoggedInScrapper(config)
-	scraper.WithDelay(5)
+	delaySeconds := int64(20)
+	scraper.WithDelay(delaySeconds)
 
 	scraper.SetSearchMode(twitterscraper.SearchLatest)
 	keywords := strings.Join(config.TradingPairs[0].SearchKeywords, " OR ")
@@ -131,11 +131,10 @@ func MonitorTweets(config types.TradogeConfig) {
 		query += " -filter:replies"
 	}
 	log.Println("Query:", query)
-	log.Println("Start to search for new tweets every 10 seconds...")
+	log.Printf("Start to search for new tweets every %d seconds...", delaySeconds)
 
 	lastTweet := getLastTweet(scraper, query)
 	for {
-		time.Sleep(10 * time.Second)
 		//log.Println("Checking for new tweets...")
 		newLastTweet := getLastTweet(scraper, query)
 		if newLastTweet.TimeParsed.After(lastTweet.TimeParsed) && newLastTweet.ID != lastTweet.ID {
