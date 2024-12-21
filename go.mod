@@ -3,7 +3,7 @@ module github.com/gschurck/tradoge
 go 1.23.2
 
 require (
-	github.com/adshao/go-binance/v2 v2.6.1
+	github.com/adshao/go-binance/v2 v2.7.0
 	github.com/go-playground/validator/v10 v10.23.0
 	github.com/imperatrona/twitter-scraper v0.0.15
 	github.com/spf13/viper v1.19.0
@@ -18,6 +18,7 @@ require (
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
+	github.com/jpillora/backoff v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
