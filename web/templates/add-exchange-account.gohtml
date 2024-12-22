@@ -1,0 +1,15 @@
+{{define "title"}}Add exchange account{{end}}
+{{define "content"}}
+    <h1>Add exchange account</h1>
+    <form method="POST">
+        <select name="exchange" aria-label="Select an exchange" required>
+            <option selected disabled value="">
+                Select an exchange
+            </option>
+            <option>Binance Margin</option>
+        </select>
+        <input type="text" name="api-key" placeholder="API Key" aria-label="Text" />
+        <input type="password" name="secret-key" placeholder="Secret Key" aria-label="Password" />
+        <button type="submit">Save new exchange account</button>
+    </form>
+{{end}}

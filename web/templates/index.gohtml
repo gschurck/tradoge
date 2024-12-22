@@ -1,0 +1,23 @@
+{{define "title"}}Page 1{{end}}
+{{define "content"}}
+    <h1>Dashboard</h1>
+    <p>Welcome to Page 1.</p>
+    <table>
+        <thead>
+        <tr>
+            <th scope="col">Exchange</th>
+            <th scope="col">Status</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <th scope="row">Binance</th>
+            <td class="pico-color-green">Connected</td>
+        </tr>
+        <tr>
+            <th scope="row">Binance 2</th>
+            <td class="pico-color-red">Connection error</td>
+        </tr>
+    </table>
+    <a href="/add-exchange-account"><button>Add exchange account</button></a>
+{{end}}
