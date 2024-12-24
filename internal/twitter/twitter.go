@@ -112,7 +112,8 @@ func getLastTweet(scraper *twitterscraper.Scraper, query string) *twitterscraper
 	tweets := scraper.SearchTweets(context.Background(), query, 1)
 	for tweet := range tweets {
 		if tweet.Error != nil {
-			panic("Failed to get last tweet :" + tweet.Error.Error())
+			log.Printf("Failed to get last tweet: %v", tweet.Error)
+			panic(tweet.Error)
 		}
 		return &tweet.Tweet
 	}
