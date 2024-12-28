@@ -6,6 +6,7 @@ import (
 	"github.com/gschurck/tradoge/internal/types"
 	"github.com/gschurck/tradoge/internal/utils"
 	"log"
+	"strings"
 	"sync"
 )
 
@@ -25,17 +26,21 @@ func (t *Trader) TradeForExchangeName(config types.TradogeConfig, exchangeId str
 	return t.TradeBinanceMargin(config, pair)
 }
 
-func (t *Trader) ProcessNewTweet(config types.TradogeConfig, matchingKeyword string) {
+func (t *Trader) ProcessNewTweet(config types.TradogeConfig, newTweetText string) {
 	for _, tradingPair := range config.TradingPairs {
+		log.Printf("Process trading pair %s/%s", tradingPair.BaseCurrency, tradingPair.QuoteCurrency)
 		for _, keyword := range tradingPair.SearchKeywords {
-			if keyword == matchingKeyword {
-				err := t.TradeForExchangeName(config, config.ExchangeAccount.ExchangeName, tradingPair)
-				if err != nil {
-					log.Println(err)
-				}
-				log.Println("Trade", tradingPair.BaseCurrency, tradingPair.QuoteCurrency)
-				break
+			if !strings.Contains(strings.ToLower(newTweetText), strings.ToLower(keyword)) {
+				log.Println("Tweet does not contain keyword", keyword)
+				continue
 			}
+			log.Println("Tweet contains keyword", keyword)
+			log.Println("Trade", tradingPair.BaseCurrency, tradingPair.QuoteCurrency)
+			err := t.TradeForExchangeName(config, config.ExchangeAccount.ExchangeName, tradingPair)
+			if err != nil {
+				log.Println(err)
+			}
+			break
 		}
 	}
 }

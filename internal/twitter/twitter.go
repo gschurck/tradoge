@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/gschurck/tradoge/internal/trading"
 	"github.com/gschurck/tradoge/internal/types"
 	twitterscraper "github.com/imperatrona/twitter-scraper"
 	"log"
@@ -143,6 +144,7 @@ func MonitorTweets(config types.TradogeConfig) {
 			TimeParsed: time.Unix(0, 0),
 		}
 	}
+	trader := trading.NewTrader()
 	for {
 		//log.Println("Checking for new tweets...")
 		newTweet, err := getLastMatchingTweet(scraper, query)
@@ -152,6 +154,7 @@ func MonitorTweets(config types.TradogeConfig) {
 		if newTweet.TimeParsed.After(lastTweet.TimeParsed) && newTweet.ID != lastTweet.ID {
 			log.Println("New tweet found:", newTweet.Text, newTweet.TimeParsed, newTweet.PermanentURL)
 			lastTweet = newTweet
+			trader.ProcessNewTweet(config, newTweet.Text)
 		}
 	}
 }
