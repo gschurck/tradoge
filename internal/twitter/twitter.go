@@ -145,10 +145,13 @@ func MonitorTweets(config types.TradogeConfig) {
 		}
 	}
 	trader := trading.NewTrader()
+	heartbeatClient := &http.Client{
+		Timeout: 10 * time.Second,
+	}
 	for {
 		//log.Println("Checking for new tweets...")
 		if config.HeartbeatURL != "" {
-			_, err := http.Get(config.HeartbeatURL)
+			_, err := heartbeatClient.Get(config.HeartbeatURL)
 			if err != nil {
 				log.Println("Failed to send heartbeat:", err)
 			}
