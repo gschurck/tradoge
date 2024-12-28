@@ -11,6 +11,7 @@ type TradogeConfig struct {
 		ApiCredentials ApiCredentials `validate:"required"`
 	} `validate:"required"`
 	TradingPairs []TradingPair `validate:"required,min=1,max=1,dive"`
+	HeartbeatURL string        `validate:"omitempty,url"`
 }
 
 type TradingPair struct {

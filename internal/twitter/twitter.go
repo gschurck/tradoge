@@ -85,7 +85,7 @@ func getLoggedInScrapper(config types.TradogeConfig) *twitterscraper.Scraper {
 			panic("Failed to log in to Twitter")
 		}
 	}
-	log.Println("Logged in")
+	log.Println("Logged in to Twitter")
 	return scraper
 }
 
@@ -147,6 +147,12 @@ func MonitorTweets(config types.TradogeConfig) {
 	trader := trading.NewTrader()
 	for {
 		//log.Println("Checking for new tweets...")
+		if config.HeartbeatURL != "" {
+			_, err := http.Get(config.HeartbeatURL)
+			if err != nil {
+				log.Println("Failed to send heartbeat:", err)
+			}
+		}
 		newTweet, err := getLastMatchingTweet(scraper, query)
 		if err != nil {
 			continue
