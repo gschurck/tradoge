@@ -1,4 +1,4 @@
-FROM golang:1.23-alpine3.20 AS builder
+FROM golang:1.23-alpine3.21 AS builder
 
 WORKDIR /app
 
@@ -15,7 +15,7 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -o main .
 
 # Use a minimal alpine image for the final stage
-FROM alpine:3.20
+FROM alpine:3.21
 
 WORKDIR /app
 
