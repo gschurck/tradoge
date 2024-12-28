@@ -11,6 +11,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"time"
 )
 
 func updateTwitterCookies(config types.TradogeConfig) {
@@ -108,16 +109,17 @@ func searchTweets(scraper *twitterscraper.Scraper, query string, config types.Tr
 	log.Println("Total tweets:", counter)
 }
 
-func getLastTweet(scraper *twitterscraper.Scraper, query string) *twitterscraper.Tweet {
+func getLastMatchingTweet(scraper *twitterscraper.Scraper, query string) (*twitterscraper.Tweet, error) {
+	// this call is delayed by the built-in rate limiter of the scraper
 	tweets := scraper.SearchTweets(context.Background(), query, 1)
 	for tweet := range tweets {
 		if tweet.Error != nil {
 			log.Printf("Failed to get last tweet: %v", tweet.Error)
 			panic(tweet.Error)
 		}
-		return &tweet.Tweet
+		return &tweet.Tweet, nil
 	}
-	panic("Failed to get last tweet")
+	return nil, fmt.Errorf("no tweet found")
 }
 
 func MonitorTweets(config types.TradogeConfig) {
@@ -134,12 +136,22 @@ func MonitorTweets(config types.TradogeConfig) {
 	log.Println("Query:", query)
 	log.Printf("Start to search for new tweets every %d seconds...", delaySeconds)
 
-	lastTweet := getLastTweet(scraper, query)
+	lastTweet, err := getLastMatchingTweet(scraper, query)
+	if err != nil {
+		log.Println("No older tweet found, defaulting to time 0")
+		lastTweet = &twitterscraper.Tweet{
+			TimeParsed: time.Unix(0, 0),
+		}
+	}
 	for {
 		//log.Println("Checking for new tweets...")
-		newLastTweet := getLastTweet(scraper, query)
-		if newLastTweet.TimeParsed.After(lastTweet.TimeParsed) && newLastTweet.ID != lastTweet.ID {
-			log.Println("New tweet found")
+		newTweet, err := getLastMatchingTweet(scraper, query)
+		if err != nil {
+			continue
+		}
+		if newTweet.TimeParsed.After(lastTweet.TimeParsed) && newTweet.ID != lastTweet.ID {
+			log.Println("New tweet found:", newTweet.Text, newTweet.TimeParsed, newTweet.PermanentURL)
+			lastTweet = newTweet
 		}
 	}
 }
