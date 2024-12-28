@@ -6,6 +6,7 @@ import (
 	"github.com/gschurck/tradoge/internal/types"
 	"github.com/spf13/viper"
 	"log"
+	"strings"
 )
 
 var validate *validator.Validate
@@ -35,5 +36,16 @@ func LoadConfig() types.TradogeConfig {
 	//for _, exchangeAccount := range config.ExchangeAccounts {
 	//	fmt.Println("Exchange:", exchangeAccount.AccountName)
 	//}
+	if config.HeartbeatURL != "" {
+		log.Println("Heartbeat URL:", config.HeartbeatURL)
+	}
+
+	log.Println("Trading pairs:")
+	for id, tradingPair := range config.TradingPairs {
+		log.Printf("%d. %s/%s", id+1, tradingPair.BaseCurrency, tradingPair.QuoteCurrency)
+		keywords := strings.Join(tradingPair.SearchKeywords, ", ")
+		log.Println("   Twitter search keywords:", keywords)
+	}
+
 	return config
 }
