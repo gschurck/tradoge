@@ -10,6 +10,7 @@ import (
 	"log"
 	"strings"
 	"sync"
+	"time"
 )
 
 type Trader struct {
@@ -46,6 +47,9 @@ func (t *Trader) ProcessNewTweet(config types.TradogeConfig, newTweetText string
 			break
 		}
 	}
+	log.Println("Done processing tweet")
+	// Wait a bit before processing new tweets
+	time.Sleep(2 * time.Minute)
 }
 
 func GetStepInfo(client *binance.Client, symbol string) float64 {
