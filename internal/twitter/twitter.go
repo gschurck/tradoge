@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/gschurck/tradoge/internal/heartbeat"
 	"github.com/gschurck/tradoge/internal/trading"
 	"github.com/gschurck/tradoge/internal/types"
 	twitterscraper "github.com/imperatrona/twitter-scraper"
@@ -116,6 +117,7 @@ func getLastMatchingTweet(scraper *twitterscraper.Scraper, query string) (*twitt
 	for tweet := range tweets {
 		if tweet.Error != nil {
 			log.Printf("Failed to get last tweet: %v", tweet.Error)
+			heartbeat.SendFailure()
 			panic(tweet.Error)
 		}
 		return &tweet.Tweet, nil
@@ -145,19 +147,14 @@ func MonitorTweets(config types.TradogeConfig) {
 		}
 	}
 	trader := trading.NewTrader()
-	heartbeatClient := &http.Client{
-		Timeout: 10 * time.Second,
-	}
 	for {
 		//log.Println("Checking for new tweets...")
 		if config.HeartbeatURL != "" {
-			_, err := heartbeatClient.Get(config.HeartbeatURL)
-			if err != nil {
-				log.Println("Failed to send heartbeat:", err)
-			}
+			heartbeat.SendHeartbeat()
 		}
 		newTweet, err := getLastMatchingTweet(scraper, query)
 		if err != nil {
+			// No new tweet found so we continue and check again after the delay
 			continue
 		}
 		if newTweet.TimeParsed.After(lastTweet.TimeParsed) && newTweet.ID != lastTweet.ID {

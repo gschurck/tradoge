@@ -2,7 +2,9 @@ package trading
 
 import (
 	"context"
+	"fmt"
 	"github.com/adshao/go-binance/v2"
+	"github.com/gschurck/tradoge/internal/heartbeat"
 	"github.com/gschurck/tradoge/internal/types"
 	"github.com/gschurck/tradoge/internal/utils"
 	"log"
@@ -39,6 +41,7 @@ func (t *Trader) ProcessNewTweet(config types.TradogeConfig, newTweetText string
 			err := t.TradeForExchangeName(config, config.ExchangeAccount.ExchangeName, tradingPair)
 			if err != nil {
 				log.Println(err)
+				heartbeat.SendFailure()
 			}
 			break
 		}
@@ -70,21 +73,23 @@ func GetStepInfo(client *binance.Client, symbol string) float64 {
 	return 0
 }
 
-func GetBinanceMarginAccountAsset(client *binance.Client, symbol string) (asset binance.IsolatedMarginAsset) {
+func GetBinanceMarginAccountAsset(client *binance.Client, symbol string) (*binance.IsolatedMarginAsset, error) {
 	isolatedMarginAccount, err := client.NewGetIsolatedMarginAccountService().Do(context.Background())
 	if err != nil {
-		log.Fatalf("Cannot get margin account %v", err)
+		log.Println("Cannot get margin account", err)
+		return nil, err
 	}
 
 	//log.Println(isolatedMarginAccount)
 	for _, asset := range isolatedMarginAccount.Assets {
 		if asset.Symbol == symbol {
 			log.Println(asset)
-			return asset
+			return &asset, nil
 		}
 	}
-	log.Fatalf("Cannot find asset %s in isolated margin account", symbol)
-	return
+	errorString := "Cannot find asset " + symbol + " in isolated margin account"
+	log.Println(errorString)
+	return nil, fmt.Errorf(errorString)
 }
 
 /*

@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"github.com/go-playground/validator/v10"
+	"github.com/gschurck/tradoge/internal/heartbeat"
 	"github.com/gschurck/tradoge/internal/types"
 	"github.com/spf13/viper"
 	"log"
@@ -32,6 +33,7 @@ func LoadConfig() types.TradogeConfig {
 	if err != nil {
 		log.Fatalln("Failed to validate config file:", err)
 	}
+	heartbeat.SetHeartbeatURL(config.HeartbeatURL)
 	log.Println("Config file loaded successfully")
 	//for _, exchangeAccount := range config.ExchangeAccounts {
 	//	fmt.Println("Exchange:", exchangeAccount.AccountName)
