@@ -156,9 +156,7 @@ func MonitorTweets(config types.TradogeConfig) {
 	trader := trading.NewTrader()
 	for {
 		//log.Println("Checking for new tweets...")
-		if config.HeartbeatURL != "" {
-			heartbeat.SendHeartbeat()
-		}
+		heartbeat.SendHeartbeat()
 		newTweet, err := getLastMatchingTweet(scraper, query)
 		if err != nil {
 			// No new tweet found so we continue and check again after the delay

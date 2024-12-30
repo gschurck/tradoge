@@ -22,18 +22,22 @@ func SetHeartbeatURL(newURL string) {
 	url = newURL
 }
 
-// SendHeartbeat sends a heartbeat to the URL
-func SendHeartbeat() {
+func sendRequest(url string) {
+	if url == "" {
+		return
+	}
 	_, err := client.Get(url)
 	if err != nil {
 		log.Println("Failed to send heartbeat:", err)
 	}
 }
 
+// SendHeartbeat sends a heartbeat to the URL
+func SendHeartbeat() {
+	sendRequest(url)
+}
+
 // SendFailure sends a failure heartbeat to the URL
 func SendFailure() {
-	_, err := client.Get(url + "/fail")
-	if err != nil {
-		log.Println("Failed to send failure heartbeat:", err)
-	}
+	sendRequest(url + "/failure")
 }
