@@ -16,6 +16,8 @@ import (
 	"time"
 )
 
+const rateLimitError = "429 Too Many Requests"
+
 func updateTwitterCookies(config types.TradogeConfig) {
 	scraper := twitterscraper.New()
 	log.Println("Logging in to Twitter...")
@@ -118,6 +120,11 @@ func getLastMatchingTweet(scraper *twitterscraper.Scraper, query string) (*twitt
 		if tweet.Error != nil {
 			log.Printf("Failed to get last tweet: %v", tweet.Error)
 			heartbeat.SendFailure()
+			if strings.Contains(tweet.Error.Error(), rateLimitError) {
+				log.Println("Rate limited, waiting 5 minutes...")
+				time.Sleep(5 * time.Minute)
+				break
+			}
 			panic(tweet.Error)
 		}
 		return &tweet.Tweet, nil
