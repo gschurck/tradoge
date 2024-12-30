@@ -21,3 +21,5 @@ tradingPairs:
       - doge
       - dogecoin
     includeReplies: false
+# Optional
+heartbeatURL:
