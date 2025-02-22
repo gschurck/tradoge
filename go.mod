@@ -1,6 +1,6 @@
 module github.com/gschurck/tradoge
 
-go 1.23.2
+go 1.24.0
 
 require (
 	github.com/adshao/go-binance/v2 v2.8.0
