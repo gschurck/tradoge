@@ -1,8 +1,6 @@
 services:
   tradoge:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: gschurck/tradoge:latest
     user: "${UID:-1000}:${GID:-1000}"
     volumes:
       - ./config:/app/config:ro
