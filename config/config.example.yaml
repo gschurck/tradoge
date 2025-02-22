@@ -5,14 +5,15 @@ twitter:
   # On Chrome browsers: Application -> Cookies -> https://x.com
   # On Firefox: Storage -> Cookies -> https://x.com
   tokens:
-    authToken: your_twitter_auth_token_in_cookies
-    ct0: your_twitter_ct0_token_in_cookies
+    authToken: # your_twitter_auth_token_in_cookies
+    ct0: # your_twitter_ct0_token_in_cookies
+  requestDelaySeconds: 20
 exchangeAccount:
   accountName: binance
   exchangeName: binance-margin
   apiCredentials:
-    key: your_API_key
-    secret: your_secret_key
+    key: # your_API_key
+    secret: # your_secret_key
 tradingPairs:
   - baseCurrency: DOGE
     quoteCurrency: USDC

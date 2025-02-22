@@ -134,7 +134,7 @@ func getLastMatchingTweet(scraper *twitterscraper.Scraper, query string) (*twitt
 
 func MonitorTweets(config types.TradogeConfig) {
 	scraper := getLoggedInScrapper(config)
-	delaySeconds := int64(20)
+	delaySeconds := config.Twitter.RequestDelaySeconds
 	scraper.WithDelay(delaySeconds)
 
 	scraper.SetSearchMode(twitterscraper.SearchLatest)

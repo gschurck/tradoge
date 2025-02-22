@@ -3,7 +3,8 @@ package types
 type TradogeConfig struct {
 	Version string `validate:"required"`
 	Twitter struct {
-		Tokens TwitterTokens `validate:"required"`
+		Tokens              TwitterTokens `validate:"required"`
+		RequestDelaySeconds int64         `validate:"required"`
 	} `validate:"required"`
 	ExchangeAccount struct {
 		AccountName    string         `validate:"required"`
