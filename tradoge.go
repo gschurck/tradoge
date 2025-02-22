@@ -6,6 +6,7 @@ import (
 	"github.com/gschurck/tradoge/internal/logger"
 	"github.com/gschurck/tradoge/internal/server"
 	"github.com/gschurck/tradoge/internal/twitter"
+	"github.com/gschurck/tradoge/internal/utils"
 	"log"
 	"net/http"
 	"os"
@@ -21,7 +22,13 @@ func main() {
 	// Check if the config file exists
 	if _, err := os.Stat("./config/config.yaml"); os.IsNotExist(err) {
 		log.Println("Config file does not exist")
-		return
+		log.Println("Creating config file from example")
+		err := utils.CopyFile("./config/config.example.yaml", "./config/config.yaml")
+		if err != nil {
+			log.Println("Failed to create config file:", err)
+			return
+		}
+		log.Println("Config file created successfully")
 	}
 
 	conf := config.LoadConfig()
