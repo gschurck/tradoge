@@ -3,6 +3,7 @@ package twitter
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/gschurck/tradoge/internal/heartbeat"
 	"github.com/gschurck/tradoge/internal/trading"
@@ -113,23 +114,38 @@ func searchTweets(scraper *twitterscraper.Scraper, query string, config types.Tr
 	log.Println("Total tweets:", counter)
 }
 
+type TweeterConnectionError struct {
+	Err error
+}
+
+func (t *TweeterConnectionError) Error() string {
+	return fmt.Sprintf("Failed to connect to Twitter: %v", t.Err)
+}
+
+var TweetNotFoundError = errors.New("no new tweet found")
+
+type RateLimitError struct {
+	Err error
+}
+
+func (r *RateLimitError) Error() string {
+	return fmt.Sprintf("Rate limited: %v", r.Err)
+}
+
 func getLastMatchingTweet(scraper *twitterscraper.Scraper, query string) (*twitterscraper.Tweet, error) {
 	// this call is delayed by the built-in rate limiter of the scraper
 	tweets := scraper.SearchTweets(context.Background(), query, 1)
 	for tweet := range tweets {
-		if tweet.Error != nil {
-			log.Printf("Failed to get last tweet: %v", tweet.Error)
-			heartbeat.SendFailure()
-			if strings.Contains(tweet.Error.Error(), rateLimitError) {
-				log.Println("Rate limited, waiting 5 minutes...")
-				time.Sleep(5 * time.Minute)
-				break
-			}
-			panic(tweet.Error)
+		if tweet.Error == nil {
+			return &tweet.Tweet, nil
 		}
-		return &tweet.Tweet, nil
+		log.Printf("Failed to get last tweet: %v", tweet.Error)
+		if strings.Contains(tweet.Error.Error(), rateLimitError) {
+			return nil, &RateLimitError{Err: tweet.Error}
+		}
+		return nil, &TweeterConnectionError{Err: tweet.Error}
 	}
-	return nil, fmt.Errorf("no tweet found")
+	return nil, TweetNotFoundError
 }
 
 func MonitorTweets(config types.TradogeConfig) {
@@ -156,12 +172,28 @@ func MonitorTweets(config types.TradogeConfig) {
 	trader := trading.NewTrader()
 	for {
 		//log.Println("Checking for new tweets...")
-		heartbeat.SendHeartbeat()
 		newTweet, err := getLastMatchingTweet(scraper, query)
+
 		if err != nil {
+			log.Println("Failed to get last tweet:", err)
+			heartbeat.SendFailure()
+		}
+
+		if errors.Is(err, &RateLimitError{}) {
+			log.Println("Rate limited, waiting 5 minutes...")
+			time.Sleep(5 * time.Minute)
+			continue
+		} else if errors.Is(err, &TweeterConnectionError{}) {
+			log.Println("Failed to connect to Twitter, waiting 5 minutes...")
+			time.Sleep(5 * time.Minute)
+			continue
+		} else if errors.Is(err, TweetNotFoundError) {
 			// No new tweet found so we continue and check again after the delay
 			continue
 		}
+
+		heartbeat.SendHeartbeat()
+
 		if newTweet.TimeParsed.After(lastTweet.TimeParsed) && newTweet.ID != lastTweet.ID {
 			log.Println("New tweet found:", newTweet.Text, newTweet.TimeParsed, newTweet.PermanentURL)
 			lastTweet = newTweet
