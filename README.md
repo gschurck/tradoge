@@ -6,13 +6,7 @@ Donate :
 <a href="https://coinrequest.io/request/tIr7sFblRGQ6PXo"><img src="https://cryptologos.cc/logos/ethereum-eth-logo.svg?v=010" alt="eth" height="50"/></a>
 <a href="https://coinrequest.io/request/PDkJ4IyL1JEw2Ab"><img src="https://cryptologos.cc/logos/tether-usdt-logo.svg?v=010" alt="usdt" width="50"/></a>
 <a href="https://coinrequest.io/request/bAOicJxeN6y76yF"><img src="https://cryptologos.cc/logos/dogecoin-doge-logo.svg?v=010" alt="doge" width="50"/></a>
--->
 
-# :chart_with_upwards_trend: TraDOGE
-
-<!-- ## ⚠️ TraDOGE is currently broken due to changes on Twitter. Stay tuned for the next update. -->
-
-Tradoge is a Binance trading bot that instantly buys and sells DOGE cryptocurrency on Binance when Elon Musk tweets about it.
 
 ![alt text](https://github.com/gschurck/tradoge/blob/media/tradoge.png?raw=true)
 
@@ -27,40 +21,100 @@ Tradoge is a Binance trading bot that instantly buys and sells DOGE cryptocurren
 - :information_source: Checking for update at start-up
 
 By default, TraDOGE ignores retweets, comments and citations to be safer. Main tweets have more impact.
+-->
 
+# :chart_with_upwards_trend: TraDOGE
+
+Tradoge is a Binance trading bot that instantly buys and sells DOGE cryptocurrency on Binance when Elon Musk tweets about it.
+
+## How it works
+
+1. The bot listens to Elon Musk's tweets
+2. When Elon Musk tweets about DOGE, the bot buys DOGE on Binance with leverage
+3. The bot sells DOGE after a certain delay
+
+## Requirements
+
+- [Docker](https://docs.docker.com/get-docker/) installed on your machine
+- [Binance account](https://www.binance.com/en/register?ref=Q6Z3J1Z1) (with API keys)
+- A Binance Isolated Margin account with an available balance (**the total amount of the isolated margin account 
+  will be used to buy DOGE**)
 ## Installation
 
-:information_source: I recommend to run tradoge in the [new Windows terminal](https://www.microsoft.com/fr-fr/p/windows-terminal/9n0dx20hk701) for full support of Unicode characters and better visual experience.
+### 1. Download files
 
-### Windows
+#### With `git`
 
-:inbox_tray: [Download tradoge.zip](https://github.com/gschurck/tradoge/releases)
+Run the following command in your terminal :
 
-- Download and unzip
-- Run `tradoge.exe`
-
-OR
-
-### Python script
-
-**Require Python 3.7**
-
-**Git :**
 ```bash
-git clone https://github.com/gschurck/tradoge.git
-cd tradoge
-pip install -r requirements.txt
-tradoge.py
+git clone https://github.com/gschurck/tradoge.git && \
+cd tradoge && \
+cp config/config.example.yaml config/config.yaml
 ```
-:warning: If you experience issues during installation try to restart the script a few times.
 
-**If you have errors with twint import, try :**
+#### Without `git`
+
+Run the following command in your terminal :
+
 ```bash
-pip install --upgrade -e git+https://github.com/twintproject/twint.git@origin/master#egg=twint
+mkdir tradoge && \
+cd tradoge && \
+curl -O https://raw.githubusercontent.com/gschurck/tradoge/refs/heads/v2/docker-compose.yml && \
+mkdir -p config data && \
+curl -o config/config.example.yaml https://raw.githubusercontent.com/gschurck/tradoge/refs/heads/v2/config/config.example.yaml && \
+cp config/config.example.yaml config/config.yaml
 ```
-**On Raspberry Pi, numpy import can cause an error. Try :**
+
+### 2. Configuration
+
+Fill the config values in file `config/config.yaml` :
+- Twitter (X) credentials
+- Binance API keys with access to Margin trading
+- The Quote Currency you want to buy DOGE with (USDT, USDC, BTC...)
+
+Transfer to your isolated margin account the amount of the quote currency you want to use to buy DOGE.
+Set the leverage you want for this isolated margin account in the Binance interface (x1, x2, x3, x5...). The bot will 
+use the last leverage you set.
+
+=> If you want to trade on USDC/DOGE and have 100 USDC in your isolated margin account with 5x leverage, the bot will 
+buy 500 
+USDC worth of DOGE.
+
+### 3. Start TraDOGE
+
+Run the following command in your terminal in your `tradoge` directory :
+
 ```bash
-sudo apt-get install libatlas-base-dev
+docker compose up
+```
+
+After building the Docker image, the bot will start and should display the following message :
+
+```
+orangepi5:tradoge:% docker compose logs                                                                                                                                                                                                                                                                                <v2>
+tradoge-1  | 2025/02/25 23:32:02 Config file loaded successfully
+tradoge-1  | 2025/02/25 23:32:02 Trading pairs:
+tradoge-1  | 2025/02/25 23:32:02 1. DOGE/USDC
+tradoge-1  | 2025/02/25 23:32:02    Twitter search keywords: doge, dogecoin
+tradoge-1  | 2025/02/25 23:32:02 Logged in to Twitter
+tradoge-1  | 2025/02/25 23:32:02 Query: (doge OR dogecoin) (from:elonmusk) -filter:replies
+tradoge-1  | 2025/02/25 23:32:02 Start to search for new tweets every 20 seconds...
+```
+
+If you see an error message, check your configuration in the `config/config.yaml` file.
+Now you can stop the bot with `Ctrl+C` and start it in detached mode to let it run in the background :
+
+```bash
+docker compose up -d
+```
+
+### 4. Stop TraDOGE
+
+To stop the bot, run the following command in your terminal in your `tradoge` directory :
+
+```bash
+docker compose down
 ```
 
 ## Why use Tradoge ?
