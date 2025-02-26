@@ -5,15 +5,19 @@ twitter:
   # On Chrome browsers: Application -> Cookies -> https://x.com
   # On Firefox: Storage -> Cookies -> https://x.com
   tokens:
-    authToken: # your_twitter_auth_token_in_cookies
-    ct0: # your_twitter_ct0_token_in_cookies
+    # Twitter (X) authToken in cookies
+    authToken:
+    # Twitter (X) ctO token in cookies
+    ct0:
   requestDelaySeconds: 20
 exchangeAccount:
   accountName: binance
   exchangeName: binance-margin
   apiCredentials:
-    key: # your_API_key
-    secret: # your_secret_key
+    # Binance API key with access to margin trading and your IP address authorized
+    key:
+    # Binance private key
+    secret:
 tradingPairs:
   - baseCurrency: DOGE
     quoteCurrency: USDC
@@ -24,4 +28,6 @@ tradingPairs:
     includeReplies: false
     sellDelayMinutes: 5
 # Optional
+# URL for services that can notify you if the bot has an error (like betterstack.com, uptimerobot.com,
+#  healthchecks.io ...)
 heartbeatURL:
