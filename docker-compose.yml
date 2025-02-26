@@ -1,6 +1,6 @@
 services:
   tradoge:
-    image: gschurck/tradoge:latest
+    image: gschurck/tradoge:2.0.0
     user: "${UID:-1000}:${GID:-1000}"
     volumes:
       - ./config:/app/config:ro
