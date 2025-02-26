@@ -47,7 +47,7 @@ func (t *Trader) TradeBinanceMargin(config types.TradogeConfig, pair types.Tradi
 	log.Println(buyOrder)
 	log.Printf("Bought for %s %s of %s\n", quoteOrderQtyStr, pair.QuoteCurrency, pair.BaseCurrency)
 
-	time.Sleep(1 * time.Minute)
+	time.Sleep(time.Duration(pair.SellDelayMinutes) * time.Minute)
 
 	log.Println("Selling")
 	refreshedBuyOrder, err := client.NewGetMarginOrderService().IsIsolated(true).Symbol(symbol).

@@ -21,6 +21,7 @@ type TradingPair struct {
 	ExchangeAccountName string   `validate:"required"`
 	SearchKeywords      []string `validate:"required,min=1,unique,dive,min=2"`
 	IncludeReplies      bool
+	SellDelayMinutes    int `validate:"required,min=1"`
 }
 
 type ApiCredentials struct {

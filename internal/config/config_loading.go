@@ -47,6 +47,7 @@ func LoadConfig() types.TradogeConfig {
 		log.Printf("%d. %s/%s", id+1, tradingPair.BaseCurrency, tradingPair.QuoteCurrency)
 		keywords := strings.Join(tradingPair.SearchKeywords, ", ")
 		log.Println("   Twitter search keywords:", keywords)
+		log.Println("   Sell delay minutes:", tradingPair.SellDelayMinutes)
 	}
 
 	return config

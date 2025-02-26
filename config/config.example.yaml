@@ -22,5 +22,6 @@ tradingPairs:
       - doge
       - dogecoin
     includeReplies: false
+    sellDelayMinutes: 5
 # Optional
 heartbeatURL:
