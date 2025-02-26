@@ -1,4 +1,5 @@
 data/*
+!data/.gitkeep
 config/*
 !config/config.example.yaml
 .idea
