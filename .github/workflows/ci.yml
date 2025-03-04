@@ -8,7 +8,7 @@ on:
       - 'v*'
 
 jobs:
-  docker:
+  build:
     runs-on: ubuntu-latest
     environment: production
     steps:
@@ -48,3 +48,5 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           push: true
+      - name: Release
+        uses: softprops/action-gh-release@v2
