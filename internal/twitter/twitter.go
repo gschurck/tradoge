@@ -17,7 +17,7 @@ import (
 	"time"
 )
 
-const rateLimitError = "429 Too Many Requests"
+const TooManyRequestsErrorMessage = "429 Too Many Requests"
 
 func updateTwitterCookies(config types.TradogeConfig) {
 	scraper := twitterscraper.New()
@@ -114,11 +114,11 @@ func searchTweets(scraper *twitterscraper.Scraper, query string, config types.Tr
 	log.Println("Total tweets:", counter)
 }
 
-type TweeterConnectionError struct {
+type ConnectionError struct {
 	Err error
 }
 
-func (t *TweeterConnectionError) Error() string {
+func (t *ConnectionError) Error() string {
 	return fmt.Sprintf("Failed to connect to Twitter: %v", t.Err)
 }
 
@@ -140,10 +140,10 @@ func getLastMatchingTweet(scraper *twitterscraper.Scraper, query string) (*twitt
 			return &tweet.Tweet, nil
 		}
 		log.Printf("Failed to get last tweet: %v", tweet.Error)
-		if strings.Contains(tweet.Error.Error(), rateLimitError) {
+		if strings.Contains(tweet.Error.Error(), TooManyRequestsErrorMessage) {
 			return nil, &RateLimitError{Err: tweet.Error}
 		}
-		return nil, &TweeterConnectionError{Err: tweet.Error}
+		return nil, &ConnectionError{Err: tweet.Error}
 	}
 	return nil, TweetNotFoundError
 }
@@ -177,18 +177,19 @@ func MonitorTweets(config types.TradogeConfig) {
 		if err != nil {
 			log.Println("Failed to get last tweet:", err)
 			heartbeat.SendFailure()
-		}
 
-		if errors.Is(err, &RateLimitError{}) {
-			log.Println("Rate limited, waiting 5 minutes...")
-			time.Sleep(5 * time.Minute)
-			continue
-		} else if errors.Is(err, &TweeterConnectionError{}) {
-			log.Println("Failed to connect to Twitter, waiting 5 minutes...")
-			time.Sleep(5 * time.Minute)
-			continue
-		} else if errors.Is(err, TweetNotFoundError) {
-			// No new tweet found so we continue and check again after the delay
+			var rateLimitError *RateLimitError
+			var connectionError *ConnectionError
+
+			if errors.As(err, &rateLimitError) {
+				log.Println("Rate limited, waiting 5 minutes...")
+				time.Sleep(5 * time.Minute)
+			} else if errors.As(err, &connectionError) {
+				log.Println("Failed to connect to Twitter, waiting 5 minutes...")
+				time.Sleep(5 * time.Minute)
+			}
+			// for TweetNotFoundError No new tweet found so we continue and check again after the delay
+			// for other errors we just log and continue
 			continue
 		}
 
