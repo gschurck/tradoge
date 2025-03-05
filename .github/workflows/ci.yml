@@ -10,7 +10,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    environment: production
     if: startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Checkout
